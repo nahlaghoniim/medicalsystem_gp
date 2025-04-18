@@ -1,4 +1,4 @@
-@extends('layouts.app')
+ @extends('layouts.main')
 
 @section('content')
 <div class="container mx-auto p-6">
@@ -27,23 +27,27 @@
         <div class="bg-white p-4 rounded-xl shadow">
             <h2 class="text-xl font-semibold mb-2">Prescriptions</h2>
             <p>Create or edit prescriptions for your patients.</p>
-            <a href="#" class="text-blue-500 hover:underline mt-2 inline-block">Manage Prescriptions</a>
+            <a href="{{ route('dashboard.doctor.prescriptions.index') }}" class="text-blue-500 hover:underline mt-2 inline-block">Manage Prescriptions</a>
         </div>
     </div>
 
     <!-- Patients List (Grid View) -->
     <div class="mt-10">
         <h2 class="text-2xl font-bold mb-4">My Patients</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($patients as $patient)
-                <div class="bg-white p-4 rounded-xl shadow">
-                    <h3 class="text-xl font-semibold">{{ $patient->name }}</h3>
-                    <p><strong>Age:</strong> {{ $patient->age }}</p>
-                    <p><strong>Medical History:</strong> {{ $patient->medical_history }}</p>
-                    <a href="{{ route('dashboard.doctor.patients.show', $patient) }}" class="text-blue-500 hover:underline mt-2 inline-block">View Details</a>
-                </div>
-            @endforeach
-        </div>
+        @if($patients->isEmpty())
+            <p class="text-center text-gray-500">No patients found.</p>
+        @else
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($patients as $patient)
+                    <div class="bg-white p-4 rounded-xl shadow">
+                        <h3 class="text-xl font-semibold">{{ $patient->name }}</h3>
+                        <p><strong>Age:</strong> {{ $patient->age }}</p>
+                        <p><strong>Medical History:</strong> {{ $patient->medical_history }}</p>
+                        <a href="{{ route('dashboard.doctor.patients.show', $patient) }}" class="text-blue-500 hover:underline mt-2 inline-block">View Details</a>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     <!-- Patients List (Table View) -->
@@ -79,5 +83,7 @@
     </div>
 
 </div>
-@endsection
+@endsection 
+ 
+
 

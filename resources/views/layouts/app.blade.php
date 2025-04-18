@@ -1,34 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>MedConnect</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- You can stack custom styles here if needed -->
+    @stack('styles')
 </head>
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
-        @include('layouts.navigation')
 
-        <!-- Page Heading -->
-        @if (isset($header))
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endif
+<body class="font-sans bg-gray-50">
 
+    <!-- Navbar Section (Optional) -->
+    <nav class="bg-blue-600 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-white font-semibold text-2xl">Smart Healthcare</a>
+            <div class="space-x-4">
+                <a href="{{ route('login') }}" class="text-white hover:text-gray-200">Login</a>
+                <a href="{{ route('register') }}" class="text-white hover:text-gray-200">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="app">
         <!-- Page Content -->
-        <main>
-            @yield('content')  <!-- This should be used to inject content -->
-        </main>
+        @yield('content')
     </div>
+
+    <!-- Optional JavaScript (Alpine.js for interactivity) -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
+
+    <!-- Stack for any additional scripts -->
+    @stack('scripts')
+
 </body>
+
 </html>

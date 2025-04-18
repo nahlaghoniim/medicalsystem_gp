@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container mx-auto p-6">
@@ -30,6 +30,11 @@
                 @endforeach
             </tbody>
         </table>
+
+        <!-- ✅ Pagination links outside the loop -->
+        <div class="mt-6">
+            {{ $patients->links() }}
+        </div>
     </div>
 </div>
 @endsection

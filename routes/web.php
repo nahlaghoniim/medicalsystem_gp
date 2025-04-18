@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PrescriptionController;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Doctor\DashboardController; // Import the Doctor Dashboard Controller
 use App\Http\Controllers\Pharmacist\DashboardController as PharmacistDashboardController; // Import the Pharmacist Dashboard Controller
 use App\Http\Controllers\Doctor\PatientController; // Import the Patient Controller for the doctor
 use App\Http\Controllers\Doctor\AppointmentController; // Import the Appointment Controller for the doctor
+use Illuminate\Support\Facades\Auth; // Import Auth for authentication routes
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
 
 /*
 |---------------------------------------------------------------------- 
@@ -18,9 +23,15 @@ use App\Http\Controllers\Doctor\AppointmentController; // Import the Appointment
 
 Route::get('/', function () {
     return view('welcome');
+})->name('home');
+
+// Auth Routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 });
 
-// Default dashboard route
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -57,6 +68,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('dashboard.doctor.appointments.update'); // Update the appointment
         Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('dashboard.doctor.appointments.show'); // Show details of a single appointment
     });
+
+Route::prefix('prescriptions')->group(function () {
+    Route::get('/', [PrescriptionController::class, 'index'])->name('dashboard.doctor.prescriptions.index');
+    Route::get('/create', [PrescriptionController::class, 'create'])->name('dashboard.doctor.prescriptions.create');
+    Route::post('/', [PrescriptionController::class, 'store'])->name('dashboard.doctor.prescriptions.store');
+    Route::get('/{id}', [PrescriptionController::class, 'show'])->name('dashboard.doctor.prescriptions.show');
+});
+
 });
 // Pharmacist Routes (Dashboard)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -65,3 +84,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+

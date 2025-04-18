@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container">
     <h2>Edit Appointment</h2>
     
-    <form action="{{ route('doctor.appointments.update', $appointment->id) }}" method="POST">
+    <form action="{{ route('dashboard.doctor.appointments.update', $appointment->id) }}" method="POST">
         @csrf
         @method('PUT')
         
@@ -22,7 +22,7 @@
         <div class="mb-3">
             <label for="appointment_date" class="form-label">Appointment Date</label>
             <input type="datetime-local" class="form-control" id="appointment_date" name="appointment_date" 
-                value="{{ $appointment->appointment_date->format('Y-m-d\TH:i') }}" required>
+                value="{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d\TH:i') }}" required>
         </div>
         
         <div class="mb-3">

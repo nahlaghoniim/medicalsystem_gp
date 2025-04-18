@@ -6,17 +6,30 @@ use App\Http\Controllers\Controller;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 
 class PatientController extends Controller
 {
     // View the list of patients for the doctor
-    public function index()
+    public function index(Request $request)
     {
         $doctor = Auth::user();
-        $patients = Patient::all(); // Or filter by doctor if needed
+    
+        $patients = Patient::query()
+            ->when($request->search, function($query) use ($request) {
+                $query->where('name', 'like', '%'.$request->search.'%')
+                      ->orWhere('medical_history', 'like', '%'.$request->search.'%');
+            })
+            ->paginate(10); // <-- 👈 MUST BE paginate, not all() or get()
+    
         return view('dashboard.doctor.patients.index', compact('patients'));
     }
+    
 
+
+
+    
      // Show form to create a new patient
      public function create()
      {
