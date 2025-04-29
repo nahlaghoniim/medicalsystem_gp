@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PrescriptionItem extends Model
 {
-    protected $fillable = ['prescription_id', 'medicine_name', 'dosage', 'duration_days'];
+    use HasFactory;
 
-    public function prescription()
-    {
-        return $this->belongsTo(Prescription::class);
-    }
+    protected $fillable = [
+        'prescription_id',
+        'medicine_name',
+        'dosage',
+        'duration_days',
+    ];
 }

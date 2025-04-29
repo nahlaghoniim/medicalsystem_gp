@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 
+
 class Prescription extends Model
 {
     protected $fillable = ['patient_id', 'doctor_id', 'issued_at', 'is_active'];
@@ -23,6 +24,11 @@ class Prescription extends Model
     {
         return $this->belongsTo(Patient::class);
     }
+    public function prescriptionItems()
+{
+    return $this->hasMany(PrescriptionItem::class);
+}
+
 }
 
 

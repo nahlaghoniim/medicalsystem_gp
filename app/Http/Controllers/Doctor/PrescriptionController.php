@@ -12,15 +12,23 @@ use App\Models\PrescriptionHistory;
 
 class PrescriptionController extends Controller
 {
-   // PrescriptionController.php
-public function index()
+    // Display all prescriptions
+    public function index()
+    {
+        $prescriptions = Prescription::with('patient')->get();
+        return view('dashboard.doctor.prescriptions.index', compact('prescriptions'));
+    }
+
+    // Show edit form
+    public function edit($id)
 {
-    $prescriptions = Prescription::with('patient')->get();
-
-    return view('dashboard.doctor.prescriptions.index', compact('prescriptions'));
+    $prescription = Prescription::with('prescriptionItems')->findOrFail($id);
+    return view('dashboard.doctor.prescriptions.edit', compact('prescription'));
 }
-// << You forgot this closing bracket
 
+    
+
+    // Store a new prescription
     public function store(Request $request)
     {
         $request->validate([
@@ -29,39 +37,80 @@ public function index()
             'notes' => 'nullable|string',
         ]);
 
-        // Step 1: Save the main prescription
+        // Save main prescription
         $prescription = Prescription::create([
             'patient_id' => $request->patient_id,
-            'doctor_id' => Auth::id(), // Get the current logged-in doctor
-            'issued_at' => Carbon::now(), // Current date and time
+            'doctor_id' => Auth::id(),
+            'issued_at' => Carbon::now(),
             'is_active' => true,
             'notes' => $request->notes,
         ]);
 
-        // Step 2: Save the prescription items
+        // Save items
         $medications = explode("\n", $request->medications);
-
         foreach ($medications as $medication) {
-            $medicationParts = explode('-', $medication);
-
-            if (count($medicationParts) >= 2) {
+            $parts = explode('-', $medication);
+            if (count($parts) >= 2) {
                 PrescriptionItem::create([
                     'prescription_id' => $prescription->id,
-                    'medicine_name' => trim($medicationParts[0]),
-                    'dosage' => trim($medicationParts[1]),
-                    'duration_days' => 5, // Default to 5 days, or change if you want
+                    'medicine_name' => trim($parts[0]),
+                    'dosage' => trim($parts[1]),
+                    'duration_days' => 5,
                 ]);
             }
         }
 
-        // Step 3: Save history
+        // Save history
         PrescriptionHistory::create([
             'prescription_id' => $prescription->id,
-            'pharmacist_id' => Auth::id(), // Adjusted to pharmacist_id
+            'pharmacist_id' => Auth::id(), // Update to actual pharmacist if applicable
         ]);
 
-        // Step 4: Redirect properly
         return redirect()->route('dashboard.doctor.prescriptions.index')
                          ->with('success', 'Prescription created successfully.');
     }
+
+    // DELETE a medication (prescription item)
+   
+
+    public function update(Request $request, $id)
+    {
+        $item = PrescriptionItem::findOrFail($id);
+    
+        $request->validate([
+            'medicine_name' => 'required|string|max:255',
+            'dosage' => 'required|string|max:255',
+            'duration_days' => 'required|integer',
+        ]);
+    
+        $item->update([
+            'medicine_name' => $request->medicine_name,
+            'dosage' => $request->dosage,
+            'duration_days' => $request->duration_days,
+        ]);
+    
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Updated successfully']);
+        }
+    
+        return redirect()->route('dashboard.doctor.patients.show', $item->prescription->patient_id)
+                         ->with('success', 'Prescription item updated successfully.');
+    }
+    
+
+    public function destroy(Request $request, $id)
+    {
+        $item = PrescriptionItem::findOrFail($id);
+        $patientId = $item->prescription->patient_id;
+    
+        $item->delete();
+    
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Deleted successfully']);
+        }
+    
+        return redirect()->route('dashboard.doctor.patients.show', $patientId)
+                         ->with('success', 'Prescription item deleted successfully.');
+    }
+    
 }

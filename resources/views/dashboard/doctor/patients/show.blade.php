@@ -38,35 +38,49 @@
         </div>
 
         <!-- Prescriptions Section -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h3 class="text-xl font-bold mb-4">Prescriptions</h3>
-            <div class="overflow-x-auto">
-                <table class="min-w-full table-auto">
-                    <thead>
-                        <tr class="bg-gray-100 text-gray-700">
-                            <th class="py-2 px-4 text-left">Drug</th>
-                            <th class="py-2 px-4 text-left">Dosage & Frequency</th>
-                            <th class="py-2 px-4 text-left">Intake</th>
-                            <th class="py-2 px-4 text-left">Duration</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($patient->prescriptions as $prescription)
+<div class="bg-white rounded-xl shadow-md p-6 mb-8">
+    <h3 class="text-xl font-bold mb-4">Prescriptions</h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full table-auto">
+            <thead>
+                <tr class="bg-gray-100 text-gray-700">
+                    <th class="py-2 px-4 text-left">Drug</th>
+                    <th class="py-2 px-4 text-left">Dosage & Frequency</th>
+                    <th class="py-2 px-4 text-left">Intake</th>
+                    <th class="py-2 px-4 text-left">Duration (days)</th>
+                    <th class="py-2 px-4 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($patient->prescriptions as $prescription)
+                    @foreach($prescription->items as $index => $item)
                         <tr class="border-b">
-                            <td class="py-2 px-4">{{ $prescription->drug_name }}</td>
-                            <td class="py-2 px-4">{{ $prescription->dosage }} {{ $prescription->frequency }}</td>
-                            <td class="py-2 px-4">{{ $prescription->intake }}</td>
-                            <td class="py-2 px-4">{{ $prescription->duration }}</td>
+                            <td class="py-2 px-4">{{ $item->medicine_name }}</td>
+                            <td class="py-2 px-4">{{ $item->dosage }}</td>
+                            <td class="py-2 px-4">{{ Str::before($item->dosage, ' ') }}</td>
+                            <td class="py-2 px-4">{{ $item->duration_days }}</td>
+
+                            @if ($index === 0)
+                                <td class="py-2 px-4" rowspan="{{ $prescription->items->count() }}">
+                                    <a href="{{ route('dashboard.doctor.prescriptions.edit', $prescription->id) }}"
+                                        class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition">
+                                        Edit
+                                    </a>
+                                </td>
+                            @endif
                         </tr>
-                        @empty
-                        <tr>
-                            <td class="py-2 px-4" colspan="4">No prescriptions found.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    @endforeach
+                @empty
+                    <tr>
+                        <td class="py-2 px-4" colspan="5">No prescriptions found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
 
         <!-- Notes Section -->
         <div class="bg-white rounded-xl shadow-md p-6">

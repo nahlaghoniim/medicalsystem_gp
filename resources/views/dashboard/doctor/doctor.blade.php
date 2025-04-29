@@ -7,7 +7,7 @@
     <aside class="w-64 bg-white p-6 shadow-lg space-y-6 hidden md:block">
         <div class="text-2xl font-bold text-primary mb-8">MedConnect</div>
         <nav class="flex flex-col space-y-4 text-gray-600">
-            <a href="{{ route('dashboard.doctor') }}" class="flex items-center gap-3 hover:text-primary">
+            <a href="{{ route('dashboard.doctor.index') }}" class="flex items-center gap-3 hover:text-primary">
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <a href="{{ route('dashboard.doctor.appointments.index') }}" class="flex items-center gap-3 hover:text-primary">
