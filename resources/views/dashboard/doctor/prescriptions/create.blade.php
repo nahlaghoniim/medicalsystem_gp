@@ -1,28 +1,32 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
-<div class="container">
-    <h1 class="mb-4">Create Prescription</h1>
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-md">
+    <h1 class="text-2xl font-bold text-primary mb-6">Create Prescription</h1>
 
-    <form action="{{ route('prescriptions.store') }}" method="POST">
+    <form action="{{ route('dashboard.doctor.prescriptions.store') }}" method="POST" class="space-y-6">
         @csrf
 
-        <div class="mb-3">
-            <label for="patient_id" class="form-label">Patient ID</label>
-            <input type="text" name="patient_id" class="form-control" required>
+        <div>
+            <label for="patient_id" class="block text-gray-700 font-semibold mb-2">Patient ID</label>
+            <input type="text" name="patient_id" id="patient_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" required>
         </div>
 
-        <div class="mb-3">
-            <label for="medications" class="form-label">Medications</label>
-            <textarea name="medications" class="form-control" rows="5" placeholder="e.g., Paracetamol 500mg - Twice a day for 5 days" required></textarea>
+        <div>
+            <label for="medications" class="block text-gray-700 font-semibold mb-2">Medications</label>
+            <textarea name="medications" id="medications" rows="5" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" placeholder="e.g., Paracetamol 500mg - Twice a day for 5 days" required></textarea>
         </div>
 
-        <div class="mb-3">
-            <label for="notes" class="form-label">Doctor Notes</label>
-            <textarea name="notes" class="form-control" rows="3" placeholder="Optional notes..."></textarea>
+        <div>
+            <label for="notes" class="block text-gray-700 font-semibold mb-2">Doctor Notes</label>
+            <textarea name="notes" id="notes" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" placeholder="Optional notes..."></textarea>
         </div>
 
-        <button type="submit" class="btn btn-success">Submit Prescription</button>
+        <div class="text-right">
+            <button type="submit" class="bg-primary hover:bg-blue-800 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition">
+                Submit Prescription
+            </button>
+        </div>
     </form>
 </div>
 @endsection

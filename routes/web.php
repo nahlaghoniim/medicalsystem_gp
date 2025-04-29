@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\Doctor\PrescriptionController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Doctor\DashboardController; // Import the Doctor Dashboard Controller
@@ -10,6 +10,9 @@ use App\Http\Controllers\Doctor\PatientController; // Import the Patient Control
 use App\Http\Controllers\Doctor\AppointmentController; // Import the Appointment Controller for the doctor
 use Illuminate\Support\Facades\Auth; // Import Auth for authentication routes
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\SocialController;
+use App\Http\Controllers\Doctor\PatientNoteController;
+
 
 
 /*
@@ -25,6 +28,10 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+Route::get('auth/google', [SocialController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [SocialController::class, 'handleGoogleCallback']);
+Route::get('auth/facebook', [SocialController::class, 'redirectToFacebook'])->name('auth.facebook');
+Route::get('auth/facebook/callback', [SocialController::class, 'handleFacebookCallback']);
 // Auth Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -49,15 +56,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Doctor Dashboard Route
     Route::get('/doctor/dashboard', [DashboardController::class, 'index'])->name('dashboard.doctor');
 
-    // Patient Routes for Doctor under 'dashboard/doctor/patients' folder
-    Route::prefix('doctor/dashboard/patients')->group(function () {
-        Route::get('/', [PatientController::class, 'index'])->name('dashboard.doctor.patients.index'); // View list of patients
-        Route::get('/create', [PatientController::class, 'create'])->name('dashboard.doctor.patients.create'); // Show form to create a new patient
-        Route::post('/', [PatientController::class, 'store'])->name('dashboard.doctor.patients.store'); // Store a new patient
-        Route::get('/{patient}/edit', [PatientController::class, 'edit'])->name('dashboard.doctor.patients.edit'); // Show form to edit a patient
-        Route::put('/{patient}', [PatientController::class, 'update'])->name('dashboard.doctor.patients.update'); // Update patient details
-        Route::get('/{patient}', [PatientController::class, 'show'])->name('dashboard.doctor.patients.show'); // View a patient's details
-    });
+    // Patient Routes for Doctor
+Route::prefix('doctor/dashboard/patients')->group(function () {
+    Route::get('/', [PatientController::class, 'index'])->name('dashboard.doctor.patients.index');
+    Route::get('/create', [PatientController::class, 'create'])->name('dashboard.doctor.patients.create');
+    Route::post('/', [PatientController::class, 'store'])->name('dashboard.doctor.patients.store');
+    Route::get('/{patient}/edit', [PatientController::class, 'edit'])->name('dashboard.doctor.patients.edit');
+    Route::put('/{patient}', [PatientController::class, 'update'])->name('dashboard.doctor.patients.update');
+    Route::get('/{patient}', [PatientController::class, 'show'])->name('dashboard.doctor.patients.show');
+    
+Route::prefix('doctor/dashboard')->name('dashboard.doctor.')->group(function () {
+    Route::post('patients/{patient}/notes', [PatientNoteController::class, 'store'])->name('patients.notes.store');
+});
+});
+
 
     // Appointment Routes for Doctor under 'dashboard/doctor/appointments' folder
     Route::prefix('doctor/dashboard/appointments')->group(function () {
@@ -69,12 +81,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('dashboard.doctor.appointments.show'); // Show details of a single appointment
     });
 
-Route::prefix('prescriptions')->group(function () {
-    Route::get('/', [PrescriptionController::class, 'index'])->name('dashboard.doctor.prescriptions.index');
-    Route::get('/create', [PrescriptionController::class, 'create'])->name('dashboard.doctor.prescriptions.create');
-    Route::post('/', [PrescriptionController::class, 'store'])->name('dashboard.doctor.prescriptions.store');
-    Route::get('/{id}', [PrescriptionController::class, 'show'])->name('dashboard.doctor.prescriptions.show');
-});
+    Route::prefix('prescriptions')->group(function () {
+        Route::get('/', [PrescriptionController::class, 'index'])->name('dashboard.doctor.prescriptions.index');
+        Route::get('/create', [PrescriptionController::class, 'create'])->name('dashboard.doctor.prescriptions.create');
+        Route::post('/', [PrescriptionController::class, 'store'])->name('dashboard.doctor.prescriptions.store');
+        Route::get('/{id}', [PrescriptionController::class, 'show'])->name('dashboard.doctor.prescriptions.show');
+    });
+    
+
 
 });
 // Pharmacist Routes (Dashboard)

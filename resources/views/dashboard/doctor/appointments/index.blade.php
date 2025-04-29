@@ -4,7 +4,8 @@
 <div class="container mx-auto p-6">
 
     <!-- Welcome message -->
-    <h1 class="text-3xl font-bold mb-6">Welcome, Dr. {{ $doctorName }}</h1>
+    <h1 class="text-3xl font-bold mb-6">Appointments for Dr. {{ Auth::user()->name }}</h1>
+
 
     <!-- Dashboard Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

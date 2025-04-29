@@ -2,58 +2,59 @@
 
 namespace App\Http\Controllers\Doctor;
 
+use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Patient;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    // Show all appointments for the doctor
-    public function index()
+    // View all appointments for the doctor
+    public function index(Request $request)
     {
-        // Check if the user is authenticated
-        if (Auth::check()) {
-            $doctorName = Auth::user()->name;
-        } else {
-            // Handle the case where the doctor is not logged in
-            $doctorName = 'Guest'; // Or redirect to login, depending on your app's logic
-        }
-    
-        $appointments = Appointment::paginate(10);
-    
-        return view('dashboard.doctor.appointments.index', compact('appointments', 'doctorName'));
+        $doctor = Auth::user();
+
+        $appointments = Appointment::where('doctor_id', $doctor->id)
+            ->with('patient')
+            ->when($request->search, function($query) use ($request) {
+                $query->whereHas('patient', function($q) use ($request) {
+                    $q->where('name', 'like', '%'.$request->search.'%');
+                });
+            })
+            ->orderBy('appointment_date', 'asc')
+            ->paginate(10);
+
+        return view('dashboard.doctor.appointments.index', compact('appointments'));
     }
-    // Show form to create a new appointment
+
+    // Show the form to create a new appointment
     public function create()
     {
-        $patients = Patient::all(); // You can use this to populate a dropdown with patients
+        $patients = Patient::all();
         return view('dashboard.doctor.appointments.create', compact('patients'));
     }
 
+    // Store a new appointment
     public function store(Request $request)
     {
         $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'appointment_date' => 'required|date',
-            // Add validation for any other fields if needed
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'status' => 'required|in:Scheduled,Completed,Cancelled',
         ]);
-    
-        // Create new appointment with logged-in doctor
+
         Appointment::create([
             'patient_id' => $request->patient_id,
-            'doctor_id' => Auth::id(), // 👈 Adds the currently authenticated doctor
+            'doctor_id' => Auth::id(),
             'appointment_date' => $request->appointment_date,
-            'status' => 'pending', // Optional if your DB already defaults it
+            'status' => $request->status,
         ]);
-    
-        return redirect()->route('dashboard.doctor.appointments.index')->with('success', 'Appointment created successfully!');
-    }
-    
-    
 
-    // Show a specific appointment's details
+        return redirect()->route('dashboard.doctor.appointments.index')->with('success', 'Appointment created successfully.');
+    }
+
+    // Show a specific appointment
     public function show(Appointment $appointment)
     {
         return view('dashboard.doctor.appointments.show', compact('appointment'));
@@ -62,36 +63,33 @@ class AppointmentController extends Controller
     // Show the form to edit an appointment
     public function edit(Appointment $appointment)
     {
-        $patients = Patient::all(); // Fetch all patients for dropdown or selection
+        $patients = Patient::all();
         return view('dashboard.doctor.appointments.edit', compact('appointment', 'patients'));
     }
 
-    // Update a specific appointment
+    // Update an appointment
     public function update(Request $request, Appointment $appointment)
     {
         $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'appointment_date' => 'required|date',
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'status' => 'required|in:Scheduled,Completed,Cancelled',
         ]);
 
-        // Update the appointment with the new data
         $appointment->update([
             'patient_id' => $request->patient_id,
             'appointment_date' => $request->appointment_date,
-            'status' => $request->status ?? $appointment->status, // Only update status if provided
+            'status' => $request->status,
         ]);
 
-        // Redirect back to the appointments list (index)
-        return redirect()->route('dashboard.doctor.appointments.index');
+        return redirect()->route('dashboard.doctor.appointments.index')->with('success', 'Appointment updated successfully.');
     }
 
-    // Delete a specific appointment
+    // Delete an appointment
     public function destroy(Appointment $appointment)
     {
-        // Delete the appointment
         $appointment->delete();
-
-        // Redirect back to the appointments list (index)
-        return redirect()->route('dashboard.doctor.appointments.index');
+        return redirect()->route('dashboard.doctor.appointments.index')->with('success', 'Appointment deleted successfully.');
     }
 }
+

@@ -19,6 +19,10 @@ class Prescription extends Model
     {
         return $this->hasMany(PrescriptionHistory::class);
     }
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }
 
 

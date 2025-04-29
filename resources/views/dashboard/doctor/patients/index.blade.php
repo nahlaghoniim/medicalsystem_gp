@@ -1,40 +1,93 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Patient List</h1>
+<div class="p-6 bg-gray-100 min-h-screen">
 
-    <a href="{{ route('dashboard.doctor.patients.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Add New Patient</a>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-[#1d5e86]">Patients</h1>
+        <a href="{{ route('dashboard.doctor.patients.create') }}" class="bg-[#1d5e86] hover:bg-blue-800 text-white px-6 py-2 rounded-lg shadow transition">
+            + Add Patient
+        </a>
+    </div>
 
-    <div class="mt-6">
-        <table class="min-w-full bg-white rounded-xl overflow-hidden shadow">
-            <thead>
+    <!-- Patients Table -->
+    <div class="bg-white rounded-2xl shadow-md overflow-x-auto">
+        <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-700">
                 <tr>
-                    <th class="px-6 py-3 text-left">Name</th>
-                    <th class="px-6 py-3 text-left">Age</th>
-                    <th class="px-6 py-3 text-left">Medical History</th>
-                    <th class="px-6 py-3 text-left">Actions</th>
+                    <th class="px-6 py-3">Patient Name</th>
+                    <th class="px-6 py-3">Age</th>
+                    <th class="px-6 py-3">Date</th>
+                    <th class="px-6 py-3">Diagnosis</th>
+                    <th class="px-6 py-3">Treatment Status</th>
+                    <th class="px-6 py-3 text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach ($patients as $patient)
-                    <tr class="border-t">
-                        <td class="px-6 py-4">{{ $patient->name }}</td>
-                        <td class="px-6 py-4">{{ $patient->age }}</td>
-                        <td class="px-6 py-4">{{ $patient->medical_history }}</td>
+            <tbody class="divide-y divide-gray-200">
+                @forelse ($patients as $patient)
+                    <tr>
+                        <!-- Patient Name -->
+                        <td class="px-6 py-4 font-medium text-gray-900 flex items-center space-x-3">
+                            <img src="{{ $patient->photo_url ?? asset('images/default-avatar.png') }}" alt="Patient" class="w-10 h-10 rounded-full object-cover">
+                            <span>{{ $patient->name }}</span>
+                        </td>
+
+                        <!-- Age -->
                         <td class="px-6 py-4">
-                            <a href="{{ route('dashboard.doctor.patients.show', $patient) }}" class="text-blue-500 hover:underline">View</a> |
-                            <a href="{{ route('dashboard.doctor.patients.edit', $patient) }}" class="text-yellow-500 hover:underline">Edit</a>
+                            {{ $patient->age ? $patient->age . ' Years' : 'Unknown' }}
+                        </td>
+
+                        <!-- Date -->
+                        <td class="px-6 py-4">
+                            {{ \Carbon\Carbon::parse($patient->created_at)->format('m/d/Y') }}
+                        </td>
+
+                        <!-- Diagnosis -->
+                        <td class="px-6 py-4">
+                            {{ $patient->condition ?? 'Unknown' }}
+                        </td>
+
+                        <!-- Treatment Status -->
+                        <td class="px-6 py-4">
+                            @php
+                                $treatmentStatus = $patient->condition_status ?? 'Unknown';
+                                $badgeClasses = 'bg-gray-100 text-gray-600'; // Default
+
+                                if ($treatmentStatus == 'Stable') {
+                                    $badgeClasses = 'bg-green-100 text-green-600';
+                                } elseif ($treatmentStatus == 'Urgent') {
+                                    $badgeClasses = 'bg-yellow-100 text-yellow-600';
+                                } elseif ($treatmentStatus == 'Emergency') {
+                                    $badgeClasses = 'bg-red-100 text-red-600';
+                                }
+                            @endphp
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $badgeClasses }}">
+                                {{ $treatmentStatus }}
+                            </span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <a href="{{ route('dashboard.doctor.patients.show', $patient) }}" class="text-blue-500 hover:underline text-sm">View</a>
+                            <a href="{{ route('dashboard.doctor.patients.edit', $patient) }}" class="text-yellow-500 hover:underline text-sm">Edit</a>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-400">
+                            No patients found.
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
 
-        <!-- ✅ Pagination links outside the loop -->
-        <div class="mt-6">
+        <!-- Pagination -->
+        <div class="p-6">
             {{ $patients->links() }}
         </div>
     </div>
+
 </div>
 @endsection

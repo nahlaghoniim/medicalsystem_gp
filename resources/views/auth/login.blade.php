@@ -1,49 +1,61 @@
 @extends('layouts.app')
 
 @section('content')
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<div class="min-h-screen flex">
+    <div class="flex justify-center mb-6">
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+</div>
+    <!-- Left side image -->
+    
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <div class="w-1/2 bg-cover bg-center" style="background-image: url('{{ asset('images/background.jpg') }}');">
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+      
+        <!-- You can leave this empty, background only -->
+    </div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+    <!-- Right side form -->
+    <div class="w-1/2 flex items-center justify-center">
+        <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-6">Welcome Back!</h2>
+            <div class="flex gap-4 mb-4">
+                <a href="{{ route('auth.facebook') }}" class="flex-1 flex items-center justify-center gap-2 border border-blue-600 text-blue-600 py-2 rounded">
+                    <img src="{{ asset('images/facebook.png') }}" alt="Facebook" class="w-5 h-5">
+                    Facebook
                 </a>
-            @endif
+            
+                <a href="{{ route('auth.google') }}" class="flex-1 flex items-center justify-center gap-2 border border-red-500 text-red-500 py-2 rounded">
+                    <img src="{{ asset('images/google.png') }}" alt="Google" class="w-5 h-5">
+                    Google
+                </a>
+            </div>
+            
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+            <div class="flex gap-4 mb-4">
+                <a href="{{ route('auth.facebook') }}">Login with Facebook</a>
+                <a href="{{ route('auth.google') }}">Login with Google</a>
+            </div>
+
+            <div class="mb-4 text-center text-gray-400">or</div>
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+                <div class="mb-4">
+                    <input type="email" name="email" class="w-full p-3 border rounded" placeholder="Email" required autofocus>
+                </div>
+
+                <div class="mb-6">
+                    <input type="password" name="password" class="w-full p-3 border rounded" placeholder="Password" required>
+                </div>
+
+                <button type="submit" class="w-full text-white py-3 rounded" style="background-color: #1d5e86;">Login</button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <a href="{{ route('register') }}" class="text-blue-600 hover:underline">Don't have an account? Sign up</a>
+            </div>
         </div>
-    </form>
+    </div>
+</div>
 @endsection
+

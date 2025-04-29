@@ -20,15 +20,24 @@
 <body class="font-sans bg-gray-50">
 
     <!-- Navbar Section (Optional) -->
-    <nav class="bg-blue-600 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-white font-semibold text-2xl">Smart Healthcare</a>
-            <div class="space-x-4">
-                <a href="{{ route('login') }}" class="text-white hover:text-gray-200">Login</a>
-                <a href="{{ route('register') }}" class="text-white hover:text-gray-200">Sign Up</a>
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md p-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <!-- Logo and Brand -->
+            <div class="flex items-center gap-2">
+                <img src="{{ asset('images/wessal.png') }}" alt="Logo" class="h-10">
+                <span class="text-2xl font-bold" style="color: #1d5e86;">MedConnect</span>
+            </div>
+    
+            <!-- Navigation Links -->
+            <div class="flex items-center space-x-6">
+                <a href="{{ route('login') }}" class="text-lg hover:text-gray-600" style="color: #1d5e86;">Login</a>
+                <a href="{{ route('register') }}" class="text-lg hover:text-gray-600" style="color: #1d5e86;">Sign Up</a>
             </div>
         </div>
     </nav>
+    
+    
 
     <div id="app">
         <!-- Page Content -->

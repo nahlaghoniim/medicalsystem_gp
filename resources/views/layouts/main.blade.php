@@ -4,70 +4,71 @@
     <meta charset="UTF-8">
     <title>MedConnect | Healthcare System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+
+<!-- FullCalendar JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Custom Config (optional but good) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1d5e86', // your main blue
+                    }
+                }
+            }
+        }
+    </script>
+
     <!-- Optional custom styles -->
     <style>
         body {
-            background-color: #f7f9fc;
             font-family: 'Segoe UI', sans-serif;
-        }
-        .navbar-brand {
-            font-weight: bold;
-            color: #005792 !important;
-        }
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-        }
-        footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-            background: #e9ecef;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url('/') }}">MedConnect</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ url('/doctor/dashboard') }}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('dashboard.doctor.prescriptions.index') }}">Prescriptions</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('dashboard.doctor.patients.index') }}">Patients</a></li>
-                    
-                    <!-- Logout Form -->
-                    <li class="nav-item">
-                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-link nav-link text-blue-500">Logout</button>
-                        </form>
-                    </li>
-                </ul>
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="{{ url('/') }}" class="text-primary font-bold text-lg">MedConnect</a>
+            <div class="space-x-6">
+                <a class="text-gray-700 hover:text-primary" href="{{ url('/doctor/dashboard') }}">Dashboard</a>
+                <a class="text-gray-700 hover:text-primary" href="{{ route('dashboard.doctor.prescriptions.index') }}">Prescriptions</a>
+                <a class="text-gray-700 hover:text-primary" href="{{ route('dashboard.doctor.patients.index') }}">Patients</a>
+
+                <!-- Logout Form -->
+                <form action="{{ route('logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="text-gray-700 hover:text-primary font-semibold">Logout</button>
+                </form>
             </div>
         </div>
     </nav>
 
     <!-- Main content -->
-    <div class="container">
+    <main class="flex-1 container mx-auto px-4 py-6">
         @yield('content')
-    </div>
+    </main>
 
-    <footer>
-        <p class="text-muted">© {{ now()->year }} MedConnect. All rights reserved.</p>
+    <!-- Footer -->
+    <footer class="bg-white text-center text-gray-500 text-sm py-4 mt-8 shadow-inner">
+        © {{ now()->year }} MedConnect. All rights reserved.
     </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
