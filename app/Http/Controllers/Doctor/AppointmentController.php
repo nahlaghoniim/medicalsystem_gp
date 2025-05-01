@@ -17,12 +17,21 @@ class AppointmentController extends Controller
 
         $appointments = Appointment::where('doctor_id', $doctor->id)
             ->with('patient')
-            ->when($request->search, function($query) use ($request) {
-                $query->whereHas('patient', function($q) use ($request) {
-                    $q->where('name', 'like', '%'.$request->search.'%');
+            ->when($request->search, function ($query) use ($request) {
+                $query->whereHas('patient', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%');
                 });
             })
-            ->orderBy('appointment_date', 'asc')
+            ->when($request->status, function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->when($request->sort === 'patient', function ($query) {
+                $query->join('patients', 'appointments.patient_id', '=', 'patients.id')
+                      ->orderBy('patients.name')
+                      ->select('appointments.*');
+            }, function ($query) {
+                $query->orderBy('appointment_date', 'asc');
+            })
             ->paginate(10);
 
         return view('dashboard.doctor.appointments.index', compact('appointments'));
@@ -40,29 +49,34 @@ class AppointmentController extends Controller
     {
         $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_date' => 'required|date|after_or_equal:now',
             'status' => 'required|in:Scheduled,Completed,Cancelled',
         ]);
-
+    
         Appointment::create([
             'patient_id' => $request->patient_id,
             'doctor_id' => Auth::id(),
-            'appointment_date' => $request->appointment_date,
+            'appointment_date' => \Carbon\Carbon::parse($request->appointment_date),
             'status' => $request->status,
+            'notes' => $request->notes,
         ]);
-
-        return redirect()->route('dashboard.doctor.appointments.index')->with('success', 'Appointment created successfully.');
+    
+        return redirect()->route('dashboard.doctor.appointments.index')
+            ->with('success', 'Appointment created successfully.');
     }
+    
 
     // Show a specific appointment
     public function show(Appointment $appointment)
     {
+        $this->authorizeAppointment($appointment);
         return view('dashboard.doctor.appointments.show', compact('appointment'));
     }
 
     // Show the form to edit an appointment
     public function edit(Appointment $appointment)
     {
+        $this->authorizeAppointment($appointment);
         $patients = Patient::all();
         return view('dashboard.doctor.appointments.edit', compact('appointment', 'patients'));
     }
@@ -70,6 +84,8 @@ class AppointmentController extends Controller
     // Update an appointment
     public function update(Request $request, Appointment $appointment)
     {
+        $this->authorizeAppointment($appointment);
+
         $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'appointment_date' => 'required|date|after_or_equal:today',
@@ -80,16 +96,92 @@ class AppointmentController extends Controller
             'patient_id' => $request->patient_id,
             'appointment_date' => $request->appointment_date,
             'status' => $request->status,
+            'notes' => $request->notes,
         ]);
 
-        return redirect()->route('dashboard.doctor.appointments.index')->with('success', 'Appointment updated successfully.');
+        return redirect()->route('dashboard.doctor.appointments.index')
+            ->with('success', 'Appointment updated successfully.');
     }
 
     // Delete an appointment
     public function destroy(Appointment $appointment)
     {
+        $this->authorizeAppointment($appointment);
         $appointment->delete();
-        return redirect()->route('dashboard.doctor.appointments.index')->with('success', 'Appointment deleted successfully.');
+
+        return redirect()->route('dashboard.doctor.appointments.index')
+            ->with('success', 'Appointment deleted successfully.');
+    }
+
+    // Mark appointment as completed
+    public function markAsCompleted(Appointment $appointment)
+    {
+        $this->authorizeAppointment($appointment);
+        $appointment->update(['status' => 'Completed']);
+        return redirect()->back()->with('success', 'Appointment marked as completed.');
+    }
+
+    // Cancel the appointment
+    public function cancel(Appointment $appointment)
+    {
+        $this->authorizeAppointment($appointment);
+        $appointment->update(['status' => 'Cancelled']);
+        return redirect()->back()->with('success', 'Appointment cancelled.');
+    }
+
+    // Reschedule the appointment
+    public function reschedule(Request $request, Appointment $appointment)
+    {
+        $this->authorizeAppointment($appointment);
+
+        $request->validate([
+            'new_date' => 'required|date|after_or_equal:today',
+        ]);
+
+        $appointment->update([
+            'appointment_date' => $request->new_date,
+            'status' => 'Scheduled',
+        ]);
+
+        return redirect()->back()->with('success', 'Appointment rescheduled.');
+    }
+
+    // Return calendar data for FullCalendar
+    public function calendarEvents()
+    {
+        $doctor = Auth::user();
+
+        $appointments = Appointment::where('doctor_id', $doctor->id)
+            ->with('patient')
+            ->get()
+            ->map(function ($appt) {
+                return [
+                    'title' => $appt->patient->name . ' (' . $appt->status . ')',
+                    'start' => $appt->appointment_date,
+                    'url' => route('dashboard.doctor.appointments.show', $appt),
+                    'color' => $this->getStatusColor($appt->status),
+                ];
+            });
+
+        return response()->json($appointments);
+    }
+
+    // Helper for color coding events
+    private function getStatusColor($status)
+    {
+        return match ($status) {
+            'Scheduled' => '#3b82f6',    // blue
+            'Completed' => '#10b981',    // green
+            'Cancelled' => '#ef4444',    // red
+            default => '#6b7280',        // gray
+        };
+    }
+
+    // Ensure only the correct doctor can access this appointment
+    private function authorizeAppointment(Appointment $appointment)
+    {
+        if ($appointment->doctor_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
     }
 }
-

@@ -11,18 +11,22 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class PatientController extends Controller
 {
     public function index(Request $request)
-    {
-        $doctor = Auth::user();
-    
-        $patients = Patient::query()
-            ->when($request->search, function($query) use ($request) {
-                $query->where('name', 'like', '%'.$request->search.'%')
-                      ->orWhere('medical_history', 'like', '%'.$request->search.'%');
-            })
-            ->paginate(10);
-    
-        return view('dashboard.doctor.patients.index', compact('patients'));
-    }
+{
+    $doctor = Auth::user();
+
+    $patients = Patient::query()
+        ->where('doctor_id', $doctor->id) // 🔧 Filter by logged-in doctor
+        ->when($request->search, function($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                  ->orWhere('medical_history', 'like', '%'.$request->search.'%');
+            });
+        })
+        ->paginate(10);
+
+    return view('dashboard.doctor.patients.index', compact('patients'));
+}
+
 
     public function create()
     {
@@ -46,6 +50,8 @@ class PatientController extends Controller
         $validatedData['doctor_id'] = Auth::id();
         
         $patient = Patient::create($validatedData);
+        return redirect()->route('dashboard.doctor.patients.show', $patient->id)
+                     ->with('success', 'Patient registered successfully.');
     }
     
 

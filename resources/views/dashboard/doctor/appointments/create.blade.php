@@ -1,32 +1,41 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
-<div class="container">
-    <h2>Create New Appointment</h2>
-    
-    <form action="{{ route('dashboard.doctor.appointments.store') }}" method="POST">
+<div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">Create Appointment</h1>
+
+    <form method="POST" action="{{ route('dashboard.doctor.appointments.store') }}" class="space-y-4">
         @csrf
-        <div class="mb-3">
-            <label for="patient_id" class="form-label">Patient</label>
-            <select name="patient_id" id="patient_id" class="form-control" required>
-                <option value="">Select a patient</option>
-                @foreach($patients as $patient)
+
+        <div>
+            <label class="block mb-1 font-medium">Patient</label>
+            <select name="patient_id" class="w-full p-2 border rounded">
+                @foreach ($patients as $patient)
                     <option value="{{ $patient->id }}">{{ $patient->name }}</option>
                 @endforeach
             </select>
         </div>
-        
-        <div class="mb-3">
-            <label for="appointment_date" class="form-label">Appointment Date</label>
-            <input type="datetime-local" class="form-control" id="appointment_date" name="appointment_date" required>
+
+        <div>
+            <label class="block mb-1 font-medium">Appointment Date</label>
+            <input type="datetime-local" name="appointment_date" class="w-full p-2 border rounded" required>
         </div>
-        
-        <div class="mb-3">
-            <label for="notes" class="form-label">Notes</label>
-            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+
+        <div>
+            <label class="block mb-1 font-medium">Status</label>
+            <select name="status" class="w-full p-2 border rounded">
+                <option value="Scheduled">Scheduled</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
         </div>
-        
-        <button type="submit" class="btn btn-primary">Create Appointment</button>
+
+        <div>
+            <label class="block mb-1 font-medium">Notes (optional)</label>
+            <textarea name="notes" class="w-full p-2 border rounded"></textarea>
+        </div>
+
+        <button type="submit" class="bg-[#3B82F6] text-white px-4 py-2 rounded hover:bg-[#2563EB]">Save Appointment</button>
     </form>
 </div>
 @endsection

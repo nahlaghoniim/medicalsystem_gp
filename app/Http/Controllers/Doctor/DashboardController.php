@@ -6,50 +6,79 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Patient;
 use App\Models\Appointment;
+use App\Models\Prescription;
+use App\Models\Payment;
 use Carbon\Carbon;
-
 
 class DashboardController extends Controller
 {
     public function index()
-{
-    $doctor = Auth::user();
+    {
+        $doctorId = Auth::id();
 
-    // Total number of patients assigned to this doctor
-    $patientsCount = Patient::where('doctor_id', $doctor->id)->count();
+        // Counts
+        $patientsCount = Patient::where('doctor_id', $doctorId)->count();
+        $appointmentsTodayCount = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_time', Carbon::today())
+            ->count();
+        $newPatientsToday = Patient::where('doctor_id', $doctorId)
+            ->whereDate('created_at', Carbon::today())
+            ->count();
+        $prescriptionsCount = Prescription::where('doctor_id', $doctorId)->count();
 
-    // Today's date
-    $today = Carbon::today();
+        // Appointments
+        $todayAppointments = Appointment::with('patient')
+            ->where('doctor_id', $doctorId)
+            ->whereDate('appointment_time', Carbon::today())
+            ->get();
 
-    // Appointments for today for this doctor
-    $todayAppointments = Appointment::where('doctor_id', $doctor->id)
-        ->whereDate('appointment_time', $today)
-        ->with('patient')
-        ->get();
+        $upcomingAppointment = Appointment::with('patient')
+            ->where('doctor_id', $doctorId)
+            ->where('appointment_time', '>', now())
+            ->orderBy('appointment_time')
+            ->first();
 
-    // New patients registered today assigned to this doctor
-    $newPatientsToday = Patient::where('doctor_id', $doctor->id)
-        ->whereDate('created_at', $today)
-        ->count();
+        // Calendar Events
+        $calendarAppointments = Appointment::with('patient')
+            ->where('doctor_id', $doctorId)
+            ->get()
+            ->filter(fn($a) => $a->appointment_time && $a->patient)
+            ->map(function ($a) {
+                return [
+                    'title' => $a->patient->name . ' @ ' . Carbon::parse($a->appointment_time)->format('H:i'),
+                    'start' => Carbon::parse($a->appointment_time)->toIso8601String(),
+                    'status' => $a->status ?? 'Scheduled',
+                ];
+            })
+            ->values()
+            ->toArray(); // Important: convert to plain array for Blade/JS
 
-    // Total payments from this doctor's appointments
-    $totalPayments = Appointment::where('doctor_id', $doctor->id)
-        ->sum('payment_amount');
+        // Financial Summary
+        $totalPayments = Payment::whereHas('appointment', function ($query) use ($doctorId) {
+            $query->where('doctor_id', $doctorId);
+        })
+        ->where('status', 'paid')
+        ->sum('amount');
 
-    // First upcoming appointment (after now)
-    $upcomingAppointment = Appointment::where('doctor_id', $doctor->id)
-        ->where('appointment_time', '>', now())
-        ->with('patient')
-        ->orderBy('appointment_time')
-        ->first();
+        $revenue = $totalPayments;
 
-    return view('dashboard.doctor.doctor', compact(
-        'doctor',
-        'patientsCount',
-        'todayAppointments',
-        'newPatientsToday',
-        'totalPayments',
-        'upcomingAppointment'
-    ));
-}
+        // Dummy Chart Data (replace with real logic)
+        $activityLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        $activityData = [5, 10, 3, 7, 2];
+
+        // Return view
+        return view('dashboard.doctor.doctor', compact(
+            'patientsCount',
+            'appointmentsTodayCount',
+            'newPatientsToday',
+            'todayAppointments',
+            'totalPayments',
+            'revenue',
+            'calendarAppointments',
+            'activityLabels',
+            'activityData',
+            'prescriptionsCount',
+            'upcomingAppointment'
+        ));
+    }
 }

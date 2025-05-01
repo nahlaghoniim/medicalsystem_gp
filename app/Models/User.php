@@ -48,4 +48,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Patient::class, 'doctor_id');
     }
+    public function setting()
+    {
+        return $this->hasOne(\App\Models\Setting::class);
+    }
+    
+    
+    
+
 }

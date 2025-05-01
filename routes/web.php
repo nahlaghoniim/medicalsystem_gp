@@ -10,6 +10,9 @@ use App\Http\Controllers\Doctor\PrescriptionItemController;
 use App\Http\Controllers\Doctor\PatientController;
 use App\Http\Controllers\Doctor\AppointmentController;
 use App\Http\Controllers\Doctor\PatientNoteController;
+use App\Http\Controllers\Doctor\PaymentController;
+use App\Http\Controllers\Doctor\MedicationController;
+use App\Http\Controllers\Doctor\SettingController;
 use App\Http\Controllers\Pharmacist\DashboardController as PharmacistDashboardController;
 
 Route::get('/', function () {
@@ -42,7 +45,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Doctor Dashboard Routes
-Route::middleware(['auth', 'verified'])->prefix('doctor/dashboard')->name('dashboard.doctor.')->group(function () {
+Route::middleware(['auth', 'verified', 'doctor'])->prefix('doctor/dashboard')->name('dashboard.doctor.')->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('index');
@@ -66,6 +69,9 @@ Route::middleware(['auth', 'verified'])->prefix('doctor/dashboard')->name('dashb
         Route::get('/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
         Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
         Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
+        Route::post('/{appointment}/complete', [AppointmentController::class, 'markAsCompleted'])->name('appointments.markCompleted');
+        Route::post('/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
+        Route::post('/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('appointments.reschedule');
     });
 
     // Prescriptions
@@ -79,11 +85,21 @@ Route::middleware(['auth', 'verified'])->prefix('doctor/dashboard')->name('dashb
         Route::delete('/{prescription}', [PrescriptionController::class, 'destroy'])->name('prescriptions.destroy');
     });
 
-    // Prescription Items (New clean controller)
+    // Settings
+    Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
+    Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
+
+    // Prescription Items
     Route::prefix('prescription-items')->name('prescription-items.')->group(function () {
         Route::put('/{id}', [PrescriptionItemController::class, 'update'])->name('update');
         Route::delete('/{id}', [PrescriptionItemController::class, 'destroy'])->name('destroy');
     });
+
+    // Payments
+    Route::resource('payments', PaymentController::class)->names('payments');
+
+    // Medications
+    Route::resource('medications', MedicationController::class)->names('medications');
 });
 
 // Pharmacist Dashboard
