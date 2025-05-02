@@ -12,6 +12,7 @@
     
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- You can stack custom styles here if needed -->
     @stack('styles')

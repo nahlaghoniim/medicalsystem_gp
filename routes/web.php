@@ -1,8 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialController;
+use App\Http\Controllers\Auth\RoleSelectionController;
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Doctor\DashboardController;
 use App\Http\Controllers\Doctor\PrescriptionController;
@@ -25,32 +29,44 @@ Route::get('auth/google/callback', [SocialController::class, 'handleGoogleCallba
 Route::get('auth/facebook', [SocialController::class, 'redirectToFacebook'])->name('auth.facebook');
 Route::get('auth/facebook/callback', [SocialController::class, 'handleFacebookCallback']);
 
-// Auth Routes
+// Guest Routes (Login/Register)
 Route::middleware('guest')->group(function () {
+    // Login routes
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
+    // Registration routes
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+
+    // Role selection routes (before or after registration as needed)
+    Route::get('/register/role', [RegisteredUserController::class, 'selectRole'])->name('role.select');
+    Route::post('/register/role', [RegisteredUserController::class, 'saveRole'])->name('role.save');
 });
 
+// Logout
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Dashboard fallback (optional, not recommended if using role-specific dashboards)
+Route::get('/dashboard/{id}', function ($id) {
+    $user = Auth::user();
+    if (!$user || $user->id != $id) {
+        abort(403);
+    }
+    return view('dashboard', compact('user'));
+})->middleware(['auth', 'verified'])->name('dashboard.user');
 
-// Profile Routes
+// Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Doctor Dashboard Routes
+// Doctor Routes
 Route::middleware(['auth', 'verified', 'doctor'])->prefix('doctor/dashboard')->name('dashboard.doctor.')->group(function () {
-
-    // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('index');
 
-    // Patients
     Route::prefix('patients')->group(function () {
         Route::get('/', [PatientController::class, 'index'])->name('patients.index');
         Route::get('/create', [PatientController::class, 'create'])->name('patients.create');
@@ -61,7 +77,6 @@ Route::middleware(['auth', 'verified', 'doctor'])->prefix('doctor/dashboard')->n
         Route::post('/{patient}/notes', [PatientNoteController::class, 'store'])->name('patients.notes.store');
     });
 
-    // Appointments
     Route::prefix('appointments')->group(function () {
         Route::get('/', [AppointmentController::class, 'index'])->name('appointments.index');
         Route::get('/create', [AppointmentController::class, 'create'])->name('appointments.create');
@@ -74,7 +89,6 @@ Route::middleware(['auth', 'verified', 'doctor'])->prefix('doctor/dashboard')->n
         Route::post('/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('appointments.reschedule');
     });
 
-    // Prescriptions
     Route::prefix('prescriptions')->group(function () {
         Route::get('/', [PrescriptionController::class, 'index'])->name('prescriptions.index');
         Route::get('/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
@@ -85,20 +99,15 @@ Route::middleware(['auth', 'verified', 'doctor'])->prefix('doctor/dashboard')->n
         Route::delete('/{prescription}', [PrescriptionController::class, 'destroy'])->name('prescriptions.destroy');
     });
 
-    // Settings
     Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
-    // Prescription Items
     Route::prefix('prescription-items')->name('prescription-items.')->group(function () {
         Route::put('/{id}', [PrescriptionItemController::class, 'update'])->name('update');
         Route::delete('/{id}', [PrescriptionItemController::class, 'destroy'])->name('destroy');
     });
 
-    // Payments
     Route::resource('payments', PaymentController::class)->names('payments');
-
-    // Medications
     Route::resource('medications', MedicationController::class)->names('medications');
 });
 
@@ -106,5 +115,3 @@ Route::middleware(['auth', 'verified', 'doctor'])->prefix('doctor/dashboard')->n
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pharmacist/dashboard', [PharmacistDashboardController::class, 'index'])->name('dashboard.pharmacist');
 });
-
-require __DIR__ . '/auth.php';

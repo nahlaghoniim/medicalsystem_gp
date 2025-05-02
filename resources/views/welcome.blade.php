@@ -8,9 +8,40 @@
         <div class="container mx-auto text-center px-6">
             <h1 class="text-4xl md:text-6xl font-bold mb-4">Smart Healthcare System</h1>
             <p class="text-lg md:text-xl mb-6">Empowering doctors and pharmacists with technology for smarter, safer, and more connected patient care.</p>
-           <a href="{{ route('login') }}" class="bg-white text-blue-600 font-semibold px-8 py-4 rounded-lg hover:bg-gray-100 transition duration-300 ease-in-out">Get Started</a>
+            @guest
+            <div class="flex justify-center gap-4">
+                <a href="{{ route('register') }}" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    Get Started
+                </a>
+                <a href="{{ route('login') }}" class="bg-transparent border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition">
+                    Login
+                </a>
+            </div>
+        @endguest
+        @auth
+        @php $user = Auth::user(); @endphp
+    
+        <div class="flex justify-center gap-4">
+            @if ($user->role === 'doctor')
+                <a href="{{ route('dashboard.doctor.index') }}" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    Go to Doctor Dashboard
+                </a>
+            @elseif ($user->role === 'pharmacist')
+                <a href="{{ route('dashboard.pharmacist') }}" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    Go to Pharmacist Dashboard
+                </a>
+            @endif
+    
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="bg-transparent border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition">
+                    Logout
+                </button>
+            </form>
+        </div>
+    @endauth
+    
 
-           <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
         </div>
     </section>
 
