@@ -17,6 +17,7 @@ class Patient extends Model
         'condition',
         'condition_status',
         'allergies',
+        'image'
     ];
 
     public function doctor()

@@ -14,9 +14,9 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $doctor = Auth::user();
-
+    
         $appointments = Appointment::where('doctor_id', $doctor->id)
-            ->with('patient')
+            ->with(['patient', 'payment']) // ✅ Include payment
             ->when($request->search, function ($query) use ($request) {
                 $query->whereHas('patient', function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->search . '%');
@@ -33,7 +33,7 @@ class AppointmentController extends Controller
                 $query->orderBy('appointment_date', 'asc');
             })
             ->paginate(10);
-
+    
         return view('dashboard.doctor.appointments.index', compact('appointments'));
     }
 
@@ -184,4 +184,5 @@ class AppointmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
     }
+    
 }

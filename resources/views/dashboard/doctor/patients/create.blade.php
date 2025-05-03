@@ -6,13 +6,20 @@
         <h1 class="text-2xl font-semibold text-center mb-6">Patient Registration</h1>
         <p class="text-center text-gray-600 mb-8 text-sm">Enter the patient's credentials to connect them to the system.</p>
 
-        <form action="{{ route('dashboard.doctor.patients.store') }}" method="POST">
+        <form action="{{ route('dashboard.doctor.patients.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Patient Name -->
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Patient Name</label>
                 <input type="text" name="name" id="name" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="mb-4">
+                <label for="image" class="block text-sm font-medium text-gray-700">Image</label>
+                <input type="file" name="image" id="image" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                <p class="mt-1 text-sm text-gray-500">Upload a patient's image (optional).</p>
             </div>
 
             <!-- Age -->
@@ -54,7 +61,7 @@
             <!-- Condition Status -->
             <div class="mb-4">
                 <label for="condition_status" class="block text-sm font-medium text-gray-700 mb-2">Condition Status</label>
-                <select name="condition_status" id="condition_status" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                <select name="condition_status" id="condition_status" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Select Status</option>
                     <option value="Stable">Stable</option>
                     <option value="Emergency">Emergency</option>
@@ -63,7 +70,6 @@
                     <option value="Critical">Critical</option>
                 </select>
             </div>
-            
 
             <!-- Allergies -->
             <div class="mb-6">
@@ -71,6 +77,7 @@
                 <input type="text" name="allergies" id="allergies" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
+            <!-- Submit -->
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition">
                 Register Patient
             </button>

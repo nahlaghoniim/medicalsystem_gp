@@ -18,28 +18,38 @@
             <div class="md:w-2/3 p-6 space-y-4">
                 <h3 class="text-lg font-semibold mb-2">Patient Summary</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-                    <div>
-                        <strong>Condition:</strong> {{ $patient->condition ?? 'N/A' }}
-                    </div>
-                    <div>
-                        <strong>Allergies:</strong> {{ $patient->allergies ?? 'None' }}
-                    </div>
-                    <div>
-                        <strong>Condition Status:</strong> {{ $patient->condition_status ?? 'N/A' }}
-                    </div>
-                    <div>
-                        <strong>Address:</strong> {{ $patient->address ?? 'N/A' }}
-                    </div>
-                    <div>
-                        <strong>Phone:</strong> {{ $patient->phone ?? 'N/A' }}
-                    </div>
+                    <div><strong>Condition:</strong> {{ $patient->condition ?? 'N/A' }}</div>
+                    <div><strong>Allergies:</strong> {{ $patient->allergies ?? 'None' }}</div>
+                    <div><strong>Condition Status:</strong> {{ $patient->condition_status ?? 'N/A' }}</div>
+                    <div><strong>Address:</strong> {{ $patient->address ?? 'N/A' }}</div>
+                    <div><strong>Phone:</strong> {{ $patient->phone ?? 'N/A' }}</div>
                 </div>
             </div>
         </div>
 
-        <!-- Prescriptions Section -->
+        <!-- Add Prescription + Search Icon -->
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387a1 1 0 01-1.414 1.414l-4.387-4.387zM8 14a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd" />
+                </svg>
+                Prescriptions
+            </h3>
+            <button onclick="document.getElementById('addPrescriptionModal').classList.remove('hidden')" 
+                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                + Add Prescription
+            </button>
+        </div>
+<!-- Prescriptions Section -->
 <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-    <h3 class="text-xl font-bold mb-4">Prescriptions</h3>
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold">Prescriptions</h3>
+        <a href="{{ route('dashboard.doctor.patients.prescriptions.create', ['patient' => $patient->id]) }}"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+            + Add Prescription
+        </a>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="min-w-full table-auto">
             <thead>
@@ -81,7 +91,6 @@
 </div>
 
 
-
         <!-- Notes Section -->
         <div class="bg-white rounded-xl shadow-md p-6">
             <h3 class="text-xl font-bold mb-4">Add Note</h3>
@@ -95,8 +104,64 @@
                 </div>
             </form>
         </div>
-
     </div>
 </div>
-@endsection
 
+<!-- Medication Search Modal -->
+<div id="addPrescriptionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6 relative">
+        <!-- Close button -->
+        <button onclick="document.getElementById('addPrescriptionModal').classList.add('hidden')" 
+                class="absolute top-2 right-4 text-gray-600 text-xl">&times;</button>
+        
+        <h2 class="text-lg font-semibold mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1111 3a7.5 7.5 0 015.65 13.65z" />
+            </svg>
+            Search & Add Medication
+        </h2>
+        
+        <input type="text" id="medicationSearch" onkeyup="searchMedication()" placeholder="Search medications..." 
+               class="w-full border rounded-lg p-3 mb-4">
+
+        <ul id="medicationResults" class="max-h-60 overflow-y-auto border rounded-lg divide-y">
+            <!-- JS will populate results -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    function searchMedication() {
+        const query = document.getElementById('medicationSearch').value;
+        const resultsList = document.getElementById('medicationResults');
+        if (query.length < 2) {
+            resultsList.innerHTML = '';
+            return;
+        }
+
+        fetch(`/medications/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsList.innerHTML = '';
+                if (data.length === 0) {
+                    resultsList.innerHTML = '<li class="p-3 text-gray-500">No results found</li>';
+                    return;
+                }
+
+                data.forEach(med => {
+                    const li = document.createElement('li');
+                    li.className = 'p-3 hover:bg-gray-100 cursor-pointer';
+                    li.innerHTML = `<strong>${med.name}</strong> – ${med.form || ''}`;
+                    li.onclick = () => addMedicationToPrescription(med);
+                    resultsList.appendChild(li);
+                });
+            });
+    }
+
+    function addMedicationToPrescription(med) {
+        const patientId = {{ $patient->id }};
+        window.location.href = `/dashboard/doctor/prescriptions/create/${patientId}?medication_id=${med.id}`;
+        document.getElementById('addPrescriptionModal').classList.add('hidden');
+    }
+</script>
+@endsection

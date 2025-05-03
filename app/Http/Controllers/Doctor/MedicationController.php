@@ -33,6 +33,31 @@ class MedicationController extends Controller
         Medication::create($validated);
         return redirect()->route('dashboard.doctor.medications.index')->with('success', 'Medication added.');
     }
+    public function show($id)
+    {
+        abort(404); // or return a dummy response if needed
+    }
+    
+   
+    public function search(Request $request)
+{
+    $query = $request->input('q');
 
-    // Add show, edit, update, destroy methods as needed
+    $medications = Medication::where('name', 'like', '%' . $query . '%')
+        ->orWhere('generic_name', 'like', '%' . $query . '%')
+        ->limit(10)
+        ->get();
+
+    // Return partial HTML if it's NOT an AJAX request
+    if (!$request->ajax()) {
+        return view('dashboard.doctor.partials.search_results', compact('medications'));
+    }
+
+    return response()->json($medications);
+}
+
+    
+
+
+     // Add show, edit, update, destroy methods as needed
 }

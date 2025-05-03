@@ -46,13 +46,22 @@ class PatientController extends Controller
             'condition' => 'nullable|string',
             'condition_status' => 'nullable|string',
             'allergies' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Optional but good
         ]);
+    
         $validatedData['doctor_id'] = Auth::id();
-        
+    
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('uploads', 'public');
+            $validatedData['image'] = $imagePath;
+        }
+    
         $patient = Patient::create($validatedData);
+    
         return redirect()->route('dashboard.doctor.patients.show', $patient->id)
-                     ->with('success', 'Patient registered successfully.');
+                         ->with('success', 'Patient registered successfully.');
     }
+    
     
 
     public function show($id)

@@ -14,5 +14,14 @@ class PrescriptionItem extends Model
         'medicine_name',
         'dosage',
         'duration_days',
+   
     ];
+
+    public function prescription()
+{
+    return $this->belongsTo(Prescription::class);
 }
+}
+
+
+

@@ -4,9 +4,25 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h4 mb-0">All Prescriptions</h1>
-        <a href="{{ route('dashboard.doctor.prescriptions.create') }}" class="btn btn-sm btn-primary">
-            + Add New Prescription
-        </a>
+
+        <!-- Redirect to create prescription form for selected patient -->
+        <form method="GET" onsubmit="
+            event.preventDefault(); 
+            const patientId = this.querySelector('[name=patient_id]').value;
+            if (patientId) {
+                window.location.href = '{{ url('doctor/dashboard/patients') }}/' + patientId + '/prescriptions/create';
+            }
+        ">
+            <div class="d-flex align-items-center">
+                <select name="patient_id" class="form-select me-2" required>
+                    <option value="">Select Patient</option>
+                    @foreach($patients as $p)
+                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">+ Add New Prescription</button>
+            </div>
+        </form>
     </div>
 
     @if($prescriptions->isEmpty())

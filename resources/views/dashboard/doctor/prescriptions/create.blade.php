@@ -1,32 +1,48 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-md">
-    <h1 class="text-2xl font-bold text-primary mb-6">Create Prescription</h1>
+<div class="bg-white p-6 rounded shadow-md">
+    <h2 class="text-xl font-bold mb-4">Add Prescription for {{ $patient->name }}</h2>
 
-    <form action="{{ route('dashboard.doctor.prescriptions.store') }}" method="POST" class="space-y-6">
+    <form method="POST" action="{{ route('dashboard.doctor.patients.prescriptions.store', ['patient' => $patient->id]) }}">
         @csrf
 
-        <div>
-            <label for="patient_id" class="block text-gray-700 font-semibold mb-2">Patient ID</label>
-            <input type="text" name="patient_id" id="patient_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" required>
+        <div id="medication-fields">
+            <div class="mb-4 border p-4 rounded">
+                <label class="block font-semibold mb-1">Medicine Name</label>
+                <input type="text" name="medications[0][medicine_name]" class="w-full border rounded p-2 mb-2" required>
+
+                <label class="block font-semibold mb-1">Dosage (e.g., 1 tablet twice daily)</label>
+                <input type="text" name="medications[0][dosage]" class="w-full border rounded p-2 mb-2" required>
+
+                <label class="block font-semibold mb-1">Duration (days)</label>
+                <input type="number" name="medications[0][duration_days]" class="w-full border rounded p-2" required>
+            </div>
         </div>
 
-        <div>
-            <label for="medications" class="block text-gray-700 font-semibold mb-2">Medications</label>
-            <textarea name="medications" id="medications" rows="5" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" placeholder="e.g., Paracetamol 500mg - Twice a day for 5 days" required></textarea>
-        </div>
+        <button type="button" id="add-more" class="bg-gray-200 px-4 py-2 rounded mb-4">+ Add Another</button>
 
-        <div>
-            <label for="notes" class="block text-gray-700 font-semibold mb-2">Doctor Notes</label>
-            <textarea name="notes" id="notes" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" placeholder="Optional notes..."></textarea>
-        </div>
-
-        <div class="text-right">
-            <button type="submit" class="bg-primary hover:bg-blue-800 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition">
-                Submit Prescription
-            </button>
-        </div>
+        <button type="submit" class="bg-primary text-white px-6 py-2 rounded">Save Prescription</button>
     </form>
 </div>
+
+<script>
+    let count = 1;
+    document.getElementById('add-more').addEventListener('click', function () {
+        const container = document.createElement('div');
+        container.className = 'mb-4 border p-4 rounded';
+        container.innerHTML = `
+            <label class="block font-semibold mb-1">Medicine Name</label>
+            <input type="text" name="medications[${count}][medicine_name]" class="w-full border rounded p-2 mb-2" required>
+
+            <label class="block font-semibold mb-1">Dosage (e.g., 1 tablet twice daily)</label>
+            <input type="text" name="medications[${count}][dosage]" class="w-full border rounded p-2 mb-2" required>
+
+            <label class="block font-semibold mb-1">Duration (days)</label>
+            <input type="number" name="medications[${count}][duration_days]" class="w-full border rounded p-2" required>
+        `;
+        document.getElementById('medication-fields').appendChild(container);
+        count++;
+    });
+</script>
 @endsection

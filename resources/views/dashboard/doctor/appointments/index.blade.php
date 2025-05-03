@@ -34,7 +34,6 @@
         <button type="submit" class="col-span-1 md:col-span-3 bg-[#3B82F6] text-white px-4 py-2 rounded hover:bg-[#2563EB]">
             Apply Filters
         </button>
-        
     </form>
 
     <!-- Appointments Table -->
@@ -45,6 +44,7 @@
                     <th class="px-6 py-3 text-left">Patient</th>
                     <th class="px-6 py-3 text-left">Appointment Date</th>
                     <th class="px-6 py-3 text-left">Status</th>
+                    <th class="px-6 py-3 text-left">Payment</th>
                     <th class="px-6 py-3 text-left">Actions</th>
                 </tr>
             </thead>
@@ -60,6 +60,14 @@
                                 {{ $appointment->status === 'Scheduled' ? 'bg-blue-100 text-blue-700' : '' }}">
                                 {{ $appointment->status }}
                             </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($appointment->payment && $appointment->payment->status === 'paid')
+                                <span class="text-green-600 font-semibold">Paid</span>
+                            @else
+                                <span class="text-red-500 font-semibold">Unpaid</span>
+                                <a href="{{ route('dashboard.doctor.payments.create', $appointment) }}" class="text-blue-500 hover:underline ml-2 text-sm">Pay</a>
+                            @endif
                         </td>
                         <td class="px-6 py-4 flex gap-3 text-sm">
                             <a href="{{ route('dashboard.doctor.appointments.edit', $appointment) }}" class="text-yellow-600 hover:underline">Edit</a>
@@ -81,7 +89,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center px-6 py-4 text-gray-500">No appointments found.</td>
+                        <td colspan="5" class="text-center px-6 py-4 text-gray-500">No appointments found.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -92,9 +100,10 @@
     <div class="mt-4">
         {{ $appointments->withQueryString()->links() }}
     </div>
+
+    <!-- Add Appointment Button -->
     <a href="{{ route('dashboard.doctor.appointments.create') }}" class="inline-block bg-[#3B82F6] text-white px-4 py-2 rounded hover:bg-[#2563EB] mb-4">
         + Add Appointment
     </a>
-    
 </div>
 @endsection
