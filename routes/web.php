@@ -66,60 +66,69 @@ Route::middleware(['auth', 'verified', 'doctor'])
     ->name('dashboard.doctor.')
     ->group(function () {
 
-    Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/', [DashboardController::class, 'index'])->name('index');
 
-    // Patients
-    Route::prefix('patients')->name('patients.')->group(function () {
-        Route::get('/', [PatientController::class, 'index'])->name('index');
-        Route::get('/create', [PatientController::class, 'create'])->name('create');
-        Route::post('/', [PatientController::class, 'store'])->name('store');
-        Route::get('/{patient}/edit', [PatientController::class, 'edit'])->name('edit');
-        Route::put('/{patient}', [PatientController::class, 'update'])->name('update');
-        Route::get('/{patient}', [PatientController::class, 'show'])->name('show');
-        Route::post('/{patient}/notes', [PatientNoteController::class, 'store'])->name('notes.store');
-        Route::delete('/{patient}', [PatientController::class, 'destroy'])->name('destroy');
+        // Patients
+        Route::prefix('patients')->name('patients.')->group(function () {
+            Route::get('/', [PatientController::class, 'index'])->name('index');
+            Route::get('/create', [PatientController::class, 'create'])->name('create');
+            Route::post('/', [PatientController::class, 'store'])->name('store');
+            Route::get('/{patient}/edit', [PatientController::class, 'edit'])->name('edit');
+            Route::put('/{patient}', [PatientController::class, 'update'])->name('update');
+            Route::get('/{patient}', [PatientController::class, 'show'])->name('show');
+            Route::delete('/{patient}', [PatientController::class, 'destroy'])->name('destroy');
 
-        // Prescriptions per patient
-        Route::get('/{patient}/prescriptions/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
-        Route::post('/{patient}/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
+            // Notes
+            Route::post('/{patient}/notes', [PatientNoteController::class, 'store'])->name('notes.store');
+
+            // Prescriptions under patient
+            Route::get('/{patient}/prescriptions', [PrescriptionController::class, 'index'])->name('prescriptions.index');
+            Route::get('/{patient}/prescriptions/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
+            Route::post('/{patient}/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
+
+            // Generate PDF for prescriptions of a patient
+            Route::get('/{patient}/prescriptions/pdf', [PrescriptionController::class, 'generatePdf'])->name('prescriptions.pdf');
+
+            // Generate QR for a specific prescription of a patient
+            Route::get('/{patient}/prescriptions/{prescription}/qr', [PrescriptionController::class, 'generateQr'])->name('prescriptions.qr');
+        });
+
+        // Prescriptions CRUD (not patient-specific)
+        Route::prefix('prescriptions')->name('prescriptions.')->group(function () {
+            Route::get('/', [PrescriptionController::class, 'index'])->name('index');
+            Route::get('/{prescription}', [PrescriptionController::class, 'show'])->name('show');
+            Route::get('/{prescription}/edit', [PrescriptionController::class, 'edit'])->name('edit');
+            Route::put('/{prescription}', [PrescriptionController::class, 'update'])->name('update');
+            Route::delete('/{prescription}', [PrescriptionController::class, 'destroy'])->name('destroy');
+        });
+
+        // Appointments
+        Route::prefix('appointments')->name('appointments.')->group(function () {
+            Route::get('/', [AppointmentController::class, 'index'])->name('index');
+            Route::get('/create', [AppointmentController::class, 'create'])->name('create');
+            Route::post('/', [AppointmentController::class, 'store'])->name('store');
+            Route::get('/{appointment}/edit', [AppointmentController::class, 'edit'])->name('edit');
+            Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('update');
+            Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('show');
+            Route::post('/{appointment}/complete', [AppointmentController::class, 'markAsCompleted'])->name('markCompleted');
+            Route::post('/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('cancel');
+            Route::post('/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('reschedule');
+        });
+
+        // Prescription Items
+        Route::prefix('prescription-items')->name('prescription-items.')->group(function () {
+            Route::put('/{id}', [PrescriptionItemController::class, 'update'])->name('update');
+            Route::delete('/{id}', [PrescriptionItemController::class, 'destroy'])->name('destroy');
+        });
+
+        // Settings
+        Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
+        Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
+
+        // Payments
+        Route::resource('payments', PaymentController::class)->names('payments');
+
+        // Medications
+        Route::resource('medications', MedicationController::class)->only(['index'])->names('medications');
+        Route::get('medications/search', [MedicationController::class, 'search'])->name('medications.search');
     });
-
-    // Prescriptions CRUD
-    Route::prefix('prescriptions')->name('prescriptions.')->group(function () {
-        Route::get('/', [PrescriptionController::class, 'index'])->name('index');
-        Route::get('/{prescription}', [PrescriptionController::class, 'show'])->name('show');
-        Route::get('/{prescription}/edit', [PrescriptionController::class, 'edit'])->name('edit');
-        Route::put('/{prescription}', [PrescriptionController::class, 'update'])->name('update');
-        Route::delete('/{prescription}', [PrescriptionController::class, 'destroy'])->name('destroy');
-    });
-
-    // Appointments
-    Route::prefix('appointments')->name('appointments.')->group(function () {
-        Route::get('/', [AppointmentController::class, 'index'])->name('index');
-        Route::get('/create', [AppointmentController::class, 'create'])->name('create');
-        Route::post('/', [AppointmentController::class, 'store'])->name('store');
-        Route::get('/{appointment}/edit', [AppointmentController::class, 'edit'])->name('edit');
-        Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('update');
-        Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('show');
-        Route::post('/{appointment}/complete', [AppointmentController::class, 'markAsCompleted'])->name('markCompleted');
-        Route::post('/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('cancel');
-        Route::post('/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('reschedule');
-    });
-
-    // Prescription Items
-    Route::prefix('prescription-items')->name('prescription-items.')->group(function () {
-        Route::put('/{id}', [PrescriptionItemController::class, 'update'])->name('update');
-        Route::delete('/{id}', [PrescriptionItemController::class, 'destroy'])->name('destroy');
-    });
-
-    // Settings
-    Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
-    Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
-
-    // Payments
-    Route::resource('payments', PaymentController::class)->names('payments');
-
-    // Medications
-    Route::resource('medications', MedicationController::class)->only(['index'])->names('medications');
-    Route::get('medications/search', [MedicationController::class, 'search'])->name('medications.search');
-});

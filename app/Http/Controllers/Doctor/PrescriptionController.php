@@ -10,7 +10,10 @@ use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\PrescriptionHistory;
 use App\Models\Medication;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Patient;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\DB;
 
 class PrescriptionController extends Controller
 {
@@ -42,36 +45,63 @@ class PrescriptionController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $prescription = Prescription::create([
-            'patient_id' => $patientId,
-            'doctor_id' => Auth::id(),
-            'issued_at' => Carbon::now(),
-            'is_active' => true,
-            'notes' => $request->notes,
-        ]);
+        DB::beginTransaction();
 
-        foreach ($request->medications as $item) {
-            $prescription->items()->create([
-                'medicine_name' => $item['medicine_name'],
-                'dosage' => $item['dosage'],
-                'duration_days' => $item['duration_days'],
+        try {
+            // Create the new prescription
+            $prescription = Prescription::create([
+                'patient_id' => $patientId,
+                'doctor_id' => Auth::id(),
+                'issued_at' => Carbon::now(),
+                'is_active' => true,
+                'notes' => $request->notes,
             ]);
+
+            // Loop through the medications and create prescription items
+            foreach ($request->medications as $item) {
+                // Find the medication by name
+                $medication = Medication::where('name', $item['medicine_name'])->first();
+
+                // If medication exists, create the prescription item
+                if ($medication) {
+                    $prescription->items()->create([
+                        'medicine_id' => $medication->id,  // Store the medication ID
+                        'dosage' => $item['dosage'],
+                        'duration_days' => $item['duration_days'],
+                    ]);
+                } else {
+                    // Handle case where medication is not found
+                    // You could set a default value or create a placeholder, depending on your requirements
+                    $prescription->items()->create([
+                        'medicine_name' => 'Unknown Medication', // Default name if not found
+                        'dosage' => $item['dosage'],
+                        'duration_days' => $item['duration_days'],
+                    ]);
+                }
+            }
+
+            // Create prescription history record
+            PrescriptionHistory::create([
+                'prescription_id' => $prescription->id,
+                'pharmacist_id' => null, // Optional: change if needed
+            ]);
+
+            DB::commit();
+
+            // Redirect after storing the prescription
+            return redirect()->route('dashboard.doctor.patients.show', $patientId)
+                             ->with('success', 'Prescription created successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'There was an error creating the prescription.']);
         }
-
-        // Create prescription history record
-        PrescriptionHistory::create([
-            'prescription_id' => $prescription->id,
-            'pharmacist_id' => null, // Optional: change if needed
-        ]);
-
-        return redirect()->route('dashboard.doctor.patients.show', $patientId)
-                         ->with('success', 'Prescription created successfully.');
     }
 
     // Show a specific prescription
     public function show($id)
     {
-        $prescription = Prescription::with('patient', 'items')->findOrFail($id);
+        $prescription = Prescription::with(['patient', 'items.medication'])->findOrFail($id);
         return view('dashboard.doctor.prescriptions.show', compact('prescription'));
     }
 
@@ -120,5 +150,53 @@ class PrescriptionController extends Controller
 
         return redirect()->route('dashboard.doctor.patients.show', $patientId)
                          ->with('success', 'Prescription item deleted successfully.');
+    }
+
+    // Generate PDF for a prescription
+    public function generatePdf($patientId)
+    {
+        // Find the patient
+        $patient = Patient::findOrFail($patientId);
+
+        // Find the prescription (load doctor and items + medication relationships)
+        $prescription = $patient->prescriptions()
+            ->with([
+                'doctor',
+                'items.medication'  // this ensures medications are eager-loaded
+            ])
+            ->firstOrFail();
+
+        // Ensure 'issued_at' is a Carbon instance
+        if (is_string($prescription->issued_at)) {
+            $prescription->issued_at = Carbon::parse($prescription->issued_at);
+        }
+
+        // Generate QR code
+        $qrCode = QrCode::size(150)->generate(route('dashboard.doctor.patients.prescriptions.qr', [
+            'patient' => $patient->id,
+            'prescription' => $prescription->id
+        ]));
+
+        // Generate PDF and return download
+        return PDF::loadView('dashboard.doctor.prescriptions.pdf', compact('prescription', 'qrCode'))
+            ->download('prescription_' . $prescription->id . '.pdf');
+    }
+
+    // Generate QR code for prescription
+    public function generateQr($patientId, $prescriptionId)
+    {
+        // Generate QR code URL
+        $prescription = Prescription::findOrFail($prescriptionId);
+        $patient = Patient::findOrFail($patientId);
+
+        $qrCodeUrl = route('dashboard.doctor.patients.prescriptions.qr', [
+            'patient' => $patient->id,
+            'prescription' => $prescription->id,
+        ]);
+
+        $qrCode = QrCode::size(150)->generate($qrCodeUrl);
+
+        // Optionally return the QR code as a response or save it
+        return response($qrCode)->header('Content-Type', 'image/svg+xml');
     }
 }

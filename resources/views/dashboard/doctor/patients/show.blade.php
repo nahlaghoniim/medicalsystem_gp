@@ -88,6 +88,28 @@
             </tbody>
         </table>
     </div>
+    @if ($patient->prescriptions->isNotEmpty())
+    @php
+        $latestPrescription = $patient->prescriptions->last();
+    @endphp
+    <div class="flex gap-4 mt-6">
+        <a href="{{ route('dashboard.doctor.patients.prescriptions.pdf', $patient->id) }}"
+           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Download PDF
+        </a>
+
+        <a href="{{ route('dashboard.doctor.patients.prescriptions.qr', ['patient' => $patient->id, 'prescription' => $latestPrescription->id]) }}"
+           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h4v4H3V3zm14 0h4v4h-4V3zM3 17h4v4H3v-4zm14 0h4v4h-4v-4z" />
+            </svg>
+            View QR Code
+        </a>
+    </div>
+@endif
 </div>
 
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Doctor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Medication;
+use App\Models\PrescriptionItem;
 
 class MedicationController extends Controller
 {
@@ -33,31 +34,49 @@ class MedicationController extends Controller
         Medication::create($validated);
         return redirect()->route('dashboard.doctor.medications.index')->with('success', 'Medication added.');
     }
+
     public function show($id)
     {
         abort(404); // or return a dummy response if needed
     }
-    
-   
+
     public function search(Request $request)
-{
-    $query = $request->input('q');
+    {
+        $query = $request->input('q');
 
-    $medications = Medication::where('name', 'like', '%' . $query . '%')
-        ->orWhere('generic_name', 'like', '%' . $query . '%')
-        ->limit(10)
-        ->get();
+        $medications = Medication::where('name', 'like', '%' . $query . '%')
+            ->orWhere('generic_name', 'like', '%' . $query . '%')
+            ->limit(10)
+            ->get();
 
-    // Return partial HTML if it's NOT an AJAX request
-    if (!$request->ajax()) {
-        return view('dashboard.doctor.partials.search_results', compact('medications'));
+        // Return partial HTML if it's NOT an AJAX request
+        if (!$request->ajax()) {
+            return view('dashboard.doctor.partials.search_results', compact('medications'));
+        }
+
+        return response()->json($medications);
     }
 
-    return response()->json($medications);
-}
+    // New method to update prescription items with missing medicine_id
+    public function updatePrescriptionItems()
+    {
+        $items = PrescriptionItem::all();
 
-    
+        foreach ($items as $item) {
+            if ($item->medicine_id === null && $item->medication_name) {
+                // Adjust the column name here to 'name' in the medications table
+                $med = Medication::where('name', $item->medication_name)->first();
 
+                if ($med) {
+                    $item->medicine_id = $med->id;
+                    $item->save();
+                    echo "Updated item ID {$item->id} to medicine ID {$med->id} - {$med->name}<br>";
+                } else {
+                    echo "No match for medication '{$item->medication_name}'<br>";
+                }
+            }
+        }
 
-     // Add show, edit, update, destroy methods as needed
+        echo "Prescription items updated successfully.";
+    }
 }

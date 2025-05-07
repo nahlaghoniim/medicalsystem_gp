@@ -197,41 +197,49 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // === Calendar Setup ===
         const calendarEl = document.getElementById('calendar');
         if (calendarEl) {
-            new FullCalendar.Calendar(calendarEl, {
+            const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                events: @json($calendarAppointments),
                 height: 300,
-                eventClick: function (info) {
+                events: @json($calendarAppointments),
+                eventClick(info) {
                     const date = info.event.start.toLocaleDateString();
                     const title = info.event.title;
                     alert(`Appointment on ${date}\n${title}`);
                 },
-                dayCellDidMount: function (info) {
+                dayCellDidMount(info) {
                     info.el.addEventListener('mouseenter', () => info.el.classList.add('bg-blue-50'));
                     info.el.addEventListener('mouseleave', () => info.el.classList.remove('bg-blue-50'));
                 }
-            }).render();
+            });
+            calendar.render();
         }
 
+        // === Activity Bar Chart Setup ===
+        const activityCtx = document.getElementById('activityChart')?.getContext('2d');
         const revenueData = @json($revenueData);
         const appointmentsData = @json($appointmentsData);
         const activityLabels = @json($activityLabels);
 
-        let currentDataset = 'revenue';
-        const activityCtx = document.getElementById('activityChart')?.getContext('2d');
-        let activityChart;
         if (activityCtx) {
-            activityChart = new Chart(activityCtx, {
+            let currentDataset = 'revenue';
+
+            const colors = {
+                revenue: { bg: '#60a5fa', border: '#3b82f6', label: 'Revenue' },
+                appointments: { bg: '#fca5a5', border: '#fb7185', label: 'Appointments' }
+            };
+
+            const activityChart = new Chart(activityCtx, {
                 type: 'bar',
                 data: {
                     labels: activityLabels,
                     datasets: [{
-                        label: 'Revenue',
+                        label: colors.revenue.label,
                         data: revenueData,
-                        backgroundColor: '#60a5fa',
-                        borderColor: '#3b82f6',
+                        backgroundColor: colors.revenue.bg,
+                        borderColor: colors.revenue.border,
                         borderWidth: 1
                     }]
                 },
@@ -243,20 +251,19 @@
             });
 
             document.getElementById('activityType')?.addEventListener('change', (e) => {
-                currentDataset = e.target.value;
-                const newData = currentDataset === 'revenue' ? revenueData : appointmentsData;
-                const newLabel = currentDataset === 'revenue' ? 'Revenue' : 'Appointments';
-                const newColor = currentDataset === 'revenue' ? '#60a5fa' : '#fca5a5';
-                const newBorderColor = currentDataset === 'revenue' ? '#3b82f6' : '#fb7185';
+                const selected = e.target.value;
+                const data = selected === 'revenue' ? revenueData : appointmentsData;
+                const color = colors[selected];
 
-                activityChart.data.datasets[0].label = newLabel;
-                activityChart.data.datasets[0].data = newData;
-                activityChart.data.datasets[0].backgroundColor = newColor;
-                activityChart.data.datasets[0].borderColor = newBorderColor;
+                activityChart.data.datasets[0].label = color.label;
+                activityChart.data.datasets[0].data = data;
+                activityChart.data.datasets[0].backgroundColor = color.bg;
+                activityChart.data.datasets[0].borderColor = color.border;
                 activityChart.update();
             });
         }
 
+        // === Treatment Doughnut Chart Setup ===
         const treatmentCtx = document.getElementById('treatmentStatusChart')?.getContext('2d');
         if (treatmentCtx) {
             new Chart(treatmentCtx, {
@@ -287,3 +294,4 @@
     });
 </script>
 @endpush
+
