@@ -27,7 +27,7 @@
             <!-- Logo and Brand -->
             <div class="flex items-center gap-2">
                 <img src="{{ asset('images/wessal.png') }}" alt="Logo" class="h-10">
-                <span class="text-2xl font-bold" style="color: #1d5e86;">MedConnect</span>
+                <span class="text-2xl font-bold" style="color: #1d5e86;">Wessal</span>
             </div>
     
             <!-- Navigation Links -->

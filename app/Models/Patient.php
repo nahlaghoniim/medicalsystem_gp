@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Patient extends Model
 {
     protected $fillable = [
@@ -17,7 +17,10 @@ class Patient extends Model
         'condition',
         'condition_status',
         'allergies',
-        'image'
+        'image' ,
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'medical_conditions','emergency_token',
     ];
 
     public function doctor()
@@ -38,5 +41,12 @@ class Patient extends Model
 {
     return $this->hasMany(Payment::class);
 }
-
+protected static function booted()
+{
+    static::creating(function ($patient) {
+        if (empty($patient->emergency_token)) {
+            $patient->emergency_token = Str::uuid()->toString();
+        }
+    });
+}
 }
