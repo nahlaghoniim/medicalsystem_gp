@@ -27,7 +27,9 @@
                     Go to Doctor Dashboard
                 </a>
             @elseif ($user->role === 'pharmacist')
-                <a href="{{ route('dashboard.pharmacist') }}" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+<a href="{{ route('dashboard.pharmacist.index') }}" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+    Go to Pharmacist Dashboard
+</a>
                     Go to Pharmacist Dashboard
                 </a>
             @endif

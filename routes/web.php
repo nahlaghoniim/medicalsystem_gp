@@ -17,7 +17,7 @@ use App\Http\Controllers\Doctor\PatientNoteController;
 use App\Http\Controllers\Doctor\PaymentController;
 use App\Http\Controllers\Doctor\MedicationController;
 use App\Http\Controllers\Doctor\SettingController;
-use App\Http\Controllers\Pharmacist\DashboardController as PharmacistDashboardController;
+use App\Http\Controllers\Pharmacist\PharmacistDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -131,4 +131,33 @@ Route::middleware(['auth', 'verified', 'doctor'])
         // Medications
         Route::resource('medications', MedicationController::class)->only(['index'])->names('medications');
         Route::get('medications/search', [MedicationController::class, 'search'])->name('medications.search');
+    });
+// Pharmacist Routes
+Route::middleware(['auth', 'verified', 'pharmacist'])
+    ->prefix('pharmacist/dashboard')
+    ->name('dashboard.pharmacist.')
+    ->group(function () {
+
+        // Dashboard Home
+        Route::get('/', [PharmacistDashboardController::class, 'index'])->name('index');
+
+        // Search for patients by ID or name (quick search or listing page)
+        Route::get('/patients/search', [PharmacistDashboardController::class, 'search'])->name('patients.search');
+
+        // View single patient's prescriptions
+        Route::get('/patients/{id}', [PharmacistDashboardController::class, 'viewPatient'])->name('patients.view');
+
+        // Show form to enter patient credentials (new flow)
+        Route::get('/patient-search', [PharmacistDashboardController::class, 'showSearchForm'])->name('patient.search.form');
+
+        // Handle patient search form submission
+        Route::post('/patient-search', [PharmacistDashboardController::class, 'searchPatient'])->name('patient.search.submit');
+
+        // ✅ Correct prescription complete route
+        Route::post('prescription/{id}/complete', [PharmacistDashboardController::class, 'completePrescription'])->name('pharmacist.prescription.complete');
+   Route::get('/scan', function () {
+    return view('pharmacist.scan');
+})->name('scan');
+
+   
     });

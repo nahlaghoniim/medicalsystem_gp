@@ -41,6 +41,7 @@ class Patient extends Model
 {
     return $this->hasMany(Payment::class);
 }
+
 protected static function booted()
 {
     static::creating(function ($patient) {

@@ -29,7 +29,7 @@
                 <img src="{{ asset('images/wessal.png') }}" alt="Logo" class="h-10">
                 <span class="text-2xl font-bold" style="color: #1d5e86;">Wessal</span>
             </div>
-    
+      
             <!-- Navigation Links -->
             <div class="flex items-center space-x-6">
                 <a href="{{ route('login') }}" class="text-lg hover:text-gray-600" style="color: #1d5e86;">Login</a>

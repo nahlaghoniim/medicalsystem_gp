@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
             if ($role === 'doctor') {
                 return redirect()->route('dashboard.doctor.index');
             } elseif ($role === 'pharmacist') {
-                return redirect()->route('dashboard.pharmacist');
+return redirect()->route('dashboard.pharmacist.index');
             } else {
                 return redirect()->route('home');
             }

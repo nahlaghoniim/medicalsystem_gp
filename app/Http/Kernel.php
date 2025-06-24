@@ -69,5 +69,7 @@ class Kernel extends HttpKernel
 
         // ✅ Custom middleware
         'doctor' => \App\Http\Middleware\DoctorMiddleware::class,
+        'pharmacist' => \App\Http\Middleware\EnsureUserIsPharmacist::class,
+
     ];
 }
