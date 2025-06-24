@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Prescription;
+use App\Models\Message; // ✅ Add this line
 
 class PharmacistDashboardController extends Controller
 {
@@ -60,6 +61,65 @@ public function completePrescription($id)
 
     return back()->with('success', 'Prescription marked as completed.');
 }
+public function allPatients()
+{
+    $patients = \App\Models\Patient::with('prescriptions')->orderBy('name')->get();
 
+    return view('pharmacist.patients.index', compact('patients'));
+}
+public function messages()
+{
+    $messages = Message::orderBy('created_at', 'desc')->get();
+    return view('pharmacist.messages.index', compact('messages'));
+}
+
+public function toggleMessageStatus($id)
+{
+    $message = Message::findOrFail($id);
+    $message->is_read = !$message->is_read;
+    $message->save();
+
+    return back()->with('success', 'Message status updated.');
+}
  
+public function allPrescriptions()
+{
+    $prescriptions = Prescription::with(['doctor', 'patient', 'items.medication'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('pharmacist.prescriptions.index', compact('prescriptions'));
+}
+public function settings()
+{
+    $pharmacist = auth()->user();
+    $setting = $pharmacist->setting;
+
+    return view('pharmacist.settings.index', compact('pharmacist', 'setting'));
+}
+
+public function updateSettings(Request $request)
+{
+    $request->validate([
+        'clinic_address' => 'nullable|string|max:255',
+        'phone' => 'nullable|string|max:20',
+        'notifications' => 'nullable|array',
+    ]);
+
+    $pharmacist = auth()->user();
+    $setting = $pharmacist->setting;
+
+    if (!$setting) {
+        // Create settings if not exists
+        $setting = new \App\Models\Setting();
+        $setting->user_id = $pharmacist->id;
+    }
+
+    $setting->clinic_address = $request->clinic_address;
+    $setting->phone = $request->phone;
+    $setting->notifications = json_encode($request->notifications);
+    $setting->save();
+
+    return back()->with('success', 'Settings updated successfully.');
+}
 }

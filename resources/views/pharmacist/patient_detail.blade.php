@@ -10,13 +10,13 @@
                 <span style="color: #1d5e86;" class="font-bold text-xl">WESSAL</span>
             </div>
             <nav class="mt-4 space-y-1">
-                <a href="#" style="color: #1d5e86; background-color: #d6e7f1;" class="flex items-center px-6 py-3 font-medium rounded-r-full">
-                    <i class="fas fa-prescription-bottle-alt mr-3"></i> Prescriptions
-                </a>
-                <a href="#" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
+             <a href="{{ route('dashboard.pharmacist.prescriptions.all') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
+    <i class="fas fa-prescription-bottle-alt mr-3"></i> Prescriptions
+</a>
+             <a href="{{ route('dashboard.pharmacist.patients.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
                     <i class="fas fa-user-injured mr-3"></i> Patient Records
                 </a>
-                <a href="#" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
+             <a href="{{ route('dashboard.pharmacist.messages.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
                     <i class="fas fa-envelope mr-3"></i> Messages
                 </a>
                 <a href="#" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">

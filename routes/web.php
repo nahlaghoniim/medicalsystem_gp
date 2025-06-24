@@ -140,6 +140,7 @@ Route::middleware(['auth', 'verified', 'pharmacist'])
 
         // Dashboard Home
         Route::get('/', [PharmacistDashboardController::class, 'index'])->name('index');
+Route::get('/prescriptions', [PharmacistDashboardController::class, 'allPrescriptions'])->name('prescriptions.all');
 
         // Search for patients by ID or name (quick search or listing page)
         Route::get('/patients/search', [PharmacistDashboardController::class, 'search'])->name('patients.search');
@@ -149,6 +150,7 @@ Route::middleware(['auth', 'verified', 'pharmacist'])
 
         // Show form to enter patient credentials (new flow)
         Route::get('/patient-search', [PharmacistDashboardController::class, 'showSearchForm'])->name('patient.search.form');
+Route::get('/patients', [PharmacistDashboardController::class, 'allPatients'])->name('patients.index');
 
         // Handle patient search form submission
         Route::post('/patient-search', [PharmacistDashboardController::class, 'searchPatient'])->name('patient.search.submit');
@@ -158,6 +160,11 @@ Route::middleware(['auth', 'verified', 'pharmacist'])
    Route::get('/scan', function () {
     return view('pharmacist.scan');
 })->name('scan');
+// Messages
+Route::get('/messages', [PharmacistDashboardController::class, 'messages'])->name('messages.index');
+Route::post('/messages/{id}/toggle', [PharmacistDashboardController::class, 'toggleMessageStatus'])->name('messages.toggle');
+Route::get('/settings', [PharmacistDashboardController::class, 'settings'])->name('settings');
+Route::post('/settings', [PharmacistDashboardController::class, 'updateSettings'])->name('settings.update');
 
    
     });

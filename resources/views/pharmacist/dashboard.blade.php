@@ -1,4 +1,4 @@
-@extends('layouts.pharmacist') {{-- Use the new clean layout --}}
+@extends('layouts.pharmacist')
 
 @section('content')
 <div class="min-h-screen flex bg-gray-100 font-sans text-gray-800">
@@ -11,18 +11,37 @@
                 <span style="color: #1d5e86;" class="font-bold text-xl">WESSAL</span>
             </div>
             <nav class="mt-4 space-y-1">
-                <a href="#" style="color: #1d5e86; background-color: #d6e7f1;" class="flex items-center px-6 py-3 font-medium rounded-r-full">
+
+                <!-- Dashboard -->
+                <a href="{{ route('dashboard.pharmacist.index') }}"
+                    class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
+                    <i class="fas fa-home mr-3"></i> Dashboard
+                </a>
+
+                <!-- Prescriptions -->
+                <a href="{{ route('dashboard.pharmacist.prescriptions.all') }}"
+                    class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/prescriptions') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
                     <i class="fas fa-prescription-bottle-alt mr-3"></i> Prescriptions
                 </a>
-                <a href="#" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
+
+                <!-- Patient Records -->
+                <a href="{{ route('dashboard.pharmacist.patients.index') }}"
+                    class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/patients') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
                     <i class="fas fa-user-injured mr-3"></i> Patient Records
                 </a>
-                <a href="#" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
+
+                <!-- Messages -->
+                <a href="{{ route('dashboard.pharmacist.messages.index') }}"
+                    class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/messages') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
                     <i class="fas fa-envelope mr-3"></i> Messages
                 </a>
-                <a href="#" class="flex items-center px-6 py-3 text-gray-700 hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
+
+                <!-- Settings -->
+                <a href="{{ route('dashboard.pharmacist.settings') }}"
+                    class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/settings') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
                     <i class="fas fa-cog mr-3"></i> Settings
                 </a>
+
             </nav>
         </div>
 
@@ -37,13 +56,15 @@
                     {{ auth()->user()->role }}
                 </div>
             </div>
-            <!-- Logout Button -->
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
-                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                </button>
-            </form>
+       <!-- Logout Button -->
+<form method="POST" action="{{ route('logout') }}">
+    @csrf
+    <button type="submit" class="text-gray-700 hover:text-red-500 transition text-xl" title="Logout">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+</form>
+
+
         </div>
     </aside>
 
@@ -65,18 +86,18 @@
 
         <!-- Main card -->
         <main class="flex-1 flex items-center justify-center p-10">
-            <div class="bg-white p-10 rounded-xl shadow-md w-full max-w-xl text-center">
-                <h2 class="text-xl font-semibold mb-2">Access Patient Prescriptions Easily</h2>
-                <p class="text-gray-600 mb-6">Choose how you want to view a patient’s details — scan their card or enter ID manually.</p>
-                <img src="/images/pd.png" alt="Medical Kit" class="w-48 mx-auto mb-6" />
-                <div class="flex justify-center gap-4">
-                    <a href="{{ route('dashboard.pharmacist.patient.search.form') }}" class="font-semibold px-4 py-2 rounded transition border border-blue-800 text-blue-800 hover:bg-blue-50">
+            <div class="bg-white p-14 rounded-2xl shadow-lg w-full max-w-4xl text-center">
+                <h2 class="text-2xl font-bold mb-4">Access Patient Prescriptions Easily</h2>
+                <p class="text-gray-600 mb-8 text-lg">Choose how you want to view a patient’s details — scan their card or enter ID manually.</p>
+                <img src="/images/pd.png" alt="Medical Kit" class="w-64 mx-auto mb-8" />
+                <div class="flex justify-center gap-6">
+                    <a href="{{ route('dashboard.pharmacist.patient.search.form') }}" class="font-semibold px-6 py-3 rounded-lg transition border border-blue-800 text-blue-800 hover:bg-blue-50">
                         + Enter Patient Credentials
                     </a>
 
-                   <a href="{{ route('dashboard.pharmacist.scan') }}" class="text-white font-semibold px-4 py-2 rounded transition" style="background-color: #1d5e86;">
-    <i class="fas fa-id-card mr-2"></i> Scan Patient Card
-</a>
+                    <a href="{{ route('dashboard.pharmacist.scan') }}" class="text-white font-semibold px-6 py-3 rounded-lg transition" style="background-color: #1d5e86;">
+                        <i class="fas fa-id-card mr-2"></i> Scan Patient Card
+                    </a>
                 </div>
             </div>
         </main>
@@ -86,3 +107,4 @@
 <!-- FontAwesome CDN -->
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 @endsection
+
