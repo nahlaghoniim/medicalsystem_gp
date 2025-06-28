@@ -11,31 +11,32 @@ use Illuminate\Support\Facades\Auth;
 class AppointmentController extends Controller
 {
     // View all appointments for the doctor
-    public function index(Request $request)
-    {
-        $doctor = Auth::user();
-    
-        $appointments = Appointment::where('doctor_id', $doctor->id)
-            ->with(['patient', 'payment']) // ✅ Include payment
-            ->when($request->search, function ($query) use ($request) {
-                $query->whereHas('patient', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%');
-                });
-            })
-            ->when($request->status, function ($query) use ($request) {
-                $query->where('status', $request->status);
-            })
-            ->when($request->sort === 'patient', function ($query) {
-                $query->join('patients', 'appointments.patient_id', '=', 'patients.id')
-                      ->orderBy('patients.name')
-                      ->select('appointments.*');
-            }, function ($query) {
-                $query->orderBy('appointment_date', 'asc');
-            })
-            ->paginate(10);
-    
-        return view('dashboard.doctor.appointments.index', compact('appointments'));
-    }
+   public function index(Request $request)
+{
+    $doctor = Auth::user();
+
+    $appointments = Appointment::where('appointments.doctor_id', $doctor->id)
+        ->with(['patient', 'payment']) // ✅ Include payment
+        ->when($request->search, function ($query) use ($request) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        })
+        ->when($request->status, function ($query) use ($request) {
+            $query->where('status', $request->status);
+        })
+        ->when($request->sort === 'patient', function ($query) {
+            $query->join('patients', 'appointments.patient_id', '=', 'patients.id')
+                  ->orderBy('patients.name')
+                  ->select('appointments.*');
+        }, function ($query) {
+            $query->orderBy('appointment_date', 'asc');
+        })
+        ->paginate(10);
+
+    return view('dashboard.doctor.appointments.index', compact('appointments'));
+}
+
 
     // Show the form to create a new appointment
     public function create()
