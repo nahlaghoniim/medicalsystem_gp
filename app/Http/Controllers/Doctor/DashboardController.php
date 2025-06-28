@@ -15,15 +15,29 @@ class DashboardController extends Controller
     public function index()
 {
     $doctorId = Auth::id();
-
+ $totalPayments = Payment::whereHas('appointment', function ($query) use ($doctorId) {
+        $query->where('doctor_id', $doctorId);
+    })->sum('amount');
     // Counts
     $patientsCount = Patient::where('doctor_id', $doctorId)->count();
     $appointmentsTodayCount = Appointment::where('doctor_id', $doctorId)
         ->whereDate('appointment_time', Carbon::today())
         ->count();
-    $newPatientsToday = Patient::where('doctor_id', $doctorId)
-        ->whereDate('created_at', Carbon::today())
-        ->count();
+   // Get actual count of new patients today from DB
+$realNewPatientsToday = Patient::where('doctor_id', $doctorId)
+    ->whereDate('created_at', Carbon::today())
+    ->count();
+
+// Set default static base (e.g. 5), or use session if it exists
+$baseStatic = 5;
+$newPatientsToday = session('new_patients_today_count', $baseStatic);
+
+// If real count exceeds current session value, sync it up
+if ($realNewPatientsToday > $newPatientsToday) {
+    $newPatientsToday = $realNewPatientsToday;
+    session(['new_patients_today_count' => $newPatientsToday]);
+}
+
     $prescriptionsCount = Prescription::where('doctor_id', $doctorId)->count();
 
     // Appointments

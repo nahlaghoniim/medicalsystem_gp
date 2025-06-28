@@ -13,34 +13,30 @@
         <nav class="mt-4 space-y-1">
 
             <!-- Dashboard -->
-            <a href="{{ route('dashboard.pharmacist.index') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-home mr-3"></i> Dashboard
-            </a>
+           <a href="{{ route('dashboard.pharmacist.index') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard') ? 'active' : '' }}">
+   <i class="fas fa-home mr-3"></i> Dashboard
+</a>
 
-            <!-- Prescriptions -->
-            <a href="{{ route('dashboard.pharmacist.prescriptions.all') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/prescriptions') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-prescription-bottle-alt mr-3"></i> Prescriptions
-            </a>
+<a href="{{ route('dashboard.pharmacist.prescriptions.all') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/prescriptions') ? 'active' : '' }}">
+   <i class="fas fa-prescription-bottle-alt mr-3"></i> Prescriptions
+</a>
 
-            <!-- Patient Records -->
-            <a href="{{ route('dashboard.pharmacist.patients.index') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/patients') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-user-injured mr-3"></i> Patient Records
-            </a>
+<a href="{{ route('dashboard.pharmacist.patients.index') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/patients') ? 'active' : '' }}">
+   <i class="fas fa-user-injured mr-3"></i> Patient Records
+</a>
 
-            <!-- Messages -->
-            <a href="{{ route('dashboard.pharmacist.messages.index') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/messages') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-envelope mr-3"></i> Messages
-            </a>
+<a href="{{ route('dashboard.pharmacist.messages.index') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/messages') ? 'active' : '' }}">
+   <i class="fas fa-envelope mr-3"></i> Messages
+</a>
 
-            <!-- Settings -->
-            <a href="{{ route('dashboard.pharmacist.settings') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/settings') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-cog mr-3"></i> Settings
-            </a>
+<a href="{{ route('dashboard.pharmacist.settings') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/settings') ? 'active' : '' }}">
+   <i class="fas fa-cog mr-3"></i> Settings
+</a>
 
         </nav>
     </div>
@@ -71,60 +67,130 @@
         </div>
     </aside>
 
-    <!-- Settings Card -->
+   <!-- Main content -->
     <div class="flex-1 p-8">
-        <h2 class="text-3xl font-bold mb-8 text-gray-800">Pharmacist Settings</h2>
+        <h2 class="text-2xl font-bold text-[#1D5E86] mb-6">Settings</h2>
 
-        @if (session('success'))
-            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
+        <!-- Tabs -->
+        <div class="mb-6 border-b border-gray-200">
+            <ul class="flex space-x-6" id="tabs">
+                <li><a href="#account" class="tab-link text-gray-600 hover:text-[#1D5E86] font-semibold">Account Info</a></li>
+                <li><a href="#pharmacy" class="tab-link text-gray-600 hover:text-[#1D5E86] font-semibold">Pharmacy Info</a></li>
+                <li><a href="#notifications" class="tab-link text-gray-600 hover:text-[#1D5E86] font-semibold">Notifications</a></li>
+                <li><a href="#security" class="tab-link text-gray-600 hover:text-[#1D5E86] font-semibold">Security</a></li>
+            </ul>
+        </div>
 
-        <div class="bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto">
-            <form action="{{ route('dashboard.pharmacist.settings.update') }}" method="POST" class="space-y-6" enctype="multipart/form-data">
+        <!-- Account Info -->
+        <div id="account" class="tab-content">
+            <form method="POST" action="#">
                 @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" name="name" value="{{ Auth::user()->name }}" class="mt-1 block w-full rounded-md border border-gray-300">
+                    </div>
 
-                <!-- Pharmacy Name -->
-                <div>
-                    <label for="clinic_address" class="block text-gray-700 font-semibold mb-2">Pharmacy Name</label>
-                    <input type="text" name="clinic_address" id="clinic_address" value="{{ old('clinic_address', $setting->clinic_address ?? '') }}" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter Pharmacy Name">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" name="email" value="{{ Auth::user()->email }}" class="mt-1 block w-full rounded-md border border-gray-300" readonly>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">License ID</label>
+                        <input type="text" name="license_id" value="{{ Auth::user()->license_id ?? '' }}" class="mt-1 block w-full rounded-md border border-gray-300">
+                    </div>
                 </div>
+            </form>
+        </div>
 
-                <!-- Phone Number -->
-                <div>
-                    <label for="phone" class="block text-gray-700 font-semibold mb-2">Phone Number</label>
-                    <input type="text" name="phone" id="phone" value="{{ old('phone', $setting->phone ?? '') }}" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter Phone Number">
+        <!-- Pharmacy Info -->
+        <div id="pharmacy" class="tab-content hidden">
+            <form method="POST" action="{{ route('dashboard.pharmacist.settings.update') }}">
+                @csrf
+                @method('PUT')
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Pharmacy Address</label>
+                        <input type="text" name="pharmacy_address" value="{{ $settings->pharmacy_address ?? '' }}" class="mt-1 block w-full rounded-md border border-gray-300">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Phone</label>
+                        <input type="text" name="phone" value="{{ $settings->phone ?? '' }}" class="mt-1 block w-full rounded-md border border-gray-300">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Working Hours</label>
+                        <input type="text" name="working_hours" value="{{ $settings->working_hours ?? '' }}" class="mt-1 block w-full rounded-md border border-gray-300">
+                    </div>
                 </div>
-
-                <!-- Notification Preferences -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Notification Preferences</label>
-                    <select name="notifications[]" multiple class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="email" {{ isset($setting) && str_contains($setting->notifications, 'email') ? 'selected' : '' }}>Email</option>
-                        <option value="sms" {{ isset($setting) && str_contains($setting->notifications, 'sms') ? 'selected' : '' }}>SMS</option>
-                    </select>
-                    <small class="text-gray-500">Hold Ctrl (Cmd on Mac) to select multiple options.</small>
+                <div class="text-right mt-6">
+                    <button type="submit" class="bg-[#1D5E86] text-white px-6 py-2 rounded-md">Save Pharmacy Info</button>
                 </div>
+            </form>
+        </div>
 
-                <!-- Working Hours -->
-                <div>
-                    <label for="working_hours" class="block text-gray-700 font-semibold mb-2">Working Hours</label>
-                    <input type="text" name="working_hours" id="working_hours" value="{{ old('working_hours', $setting->working_hours ?? '') }}" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: 9:00 AM - 9:00 PM">
+        <!-- Notifications -->
+        <div id="notifications" class="tab-content hidden">
+            <form method="POST" action="#">
+                @csrf
+                <label class="block text-sm font-medium text-gray-700 mb-4">Notification Methods</label>
+                <div class="flex gap-6">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="notifications[]" value="email" checked>
+                        Email
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="notifications[]" value="sms">
+                        SMS
+                    </label>
                 </div>
+            </form>
+        </div>
 
-                <!-- Low Stock Alert -->
-                <div>
-                    <label for="low_stock_alert" class="block text-gray-700 font-semibold mb-2">Low Stock Alert (Quantity)</label>
-                    <input type="number" name="low_stock_alert" id="low_stock_alert" value="{{ old('low_stock_alert', $setting->low_stock_alert ?? '') }}" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: 5">
+        <!-- Security -->
+        <div id="security" class="tab-content hidden">
+            <form method="POST" action="#">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">New Password</label>
+                        <input type="password" name="password" class="mt-1 block w-full rounded-md border border-gray-300">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                        <input type="password" name="password_confirmation" class="mt-1 block w-full rounded-md border border-gray-300">
+                    </div>
                 </div>
-
-                <!-- Submit Button -->
-                <div class="text-right">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl transition text-lg">Save Settings</button>
+                <div class="text-right mt-6">
+                    <button type="submit" class="bg-[#1D5E86] text-white px-6 py-2 rounded-md">Update Password</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- JS Tabs -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('.tab-link');
+        const contents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function (e) {
+                e.preventDefault();
+                contents.forEach(c => c.classList.add('hidden'));
+                document.querySelector(tab.getAttribute('href')).classList.remove('hidden');
+
+                tabs.forEach(t => t.classList.remove('text-[#1D5E86]'));
+                tab.classList.add('text-[#1D5E86]');
+            });
+        });
+
+        if (tabs.length > 0) {
+            tabs[0].click();
+        }
+    });
+</script>
 @endsection

@@ -152,35 +152,35 @@ class PrescriptionController extends Controller
                          ->with('success', 'Prescription item deleted successfully.');
     }
 
-    // Generate PDF for a prescription
-    public function generatePdf($patientId)
-    {
-        // Find the patient
-        $patient = Patient::findOrFail($patientId);
+    public function generatePdf($patientId, $prescriptionId)
+{
+    // Fetch the prescription with its relationships
+    $prescription = Prescription::with([
+        'patient',
+        'doctor',
+        'items.medication'
+    ])
+    ->where('patient_id', $patientId)
+    ->where('id', $prescriptionId)
+    ->firstOrFail();
 
-        // Find the prescription (load doctor and items + medication relationships)
-        $prescription = $patient->prescriptions()
-            ->with([
-                'doctor',
-                'items.medication'  // this ensures medications are eager-loaded
-            ])
-            ->firstOrFail();
-
-        // Ensure 'issued_at' is a Carbon instance
-        if (is_string($prescription->issued_at)) {
-            $prescription->issued_at = Carbon::parse($prescription->issued_at);
-        }
-
-        // Generate QR code
-        $qrCode = QrCode::size(150)->generate(route('dashboard.doctor.patients.prescriptions.qr', [
-            'patient' => $patient->id,
-            'prescription' => $prescription->id
-        ]));
-
-        // Generate PDF and return download
-        return PDF::loadView('dashboard.doctor.prescriptions.pdf', compact('prescription', 'qrCode'))
-            ->download('prescription_' . $prescription->id . '.pdf');
+    // Ensure issued_at is a Carbon instance
+    if (is_string($prescription->issued_at)) {
+        $prescription->issued_at = Carbon::parse($prescription->issued_at);
     }
+
+    // Generate QR code for this prescription
+    $qrCode = QrCode::size(150)->generate(route('dashboard.doctor.patients.prescriptions.qr', [
+        'patient' => $patientId,
+        'prescription' => $prescriptionId
+    ]));
+
+    // Render the PDF view with the loaded data
+
+    return PDF::loadView('dashboard.doctor.prescriptions.pdf', compact('prescription', 'qrCode'))
+        ->download('prescription_' . $prescription->id . '.pdf');
+}
+
 
     // Generate QR code for prescription
     public function generateQr($patientId, $prescriptionId)
@@ -197,6 +197,7 @@ class PrescriptionController extends Controller
         $qrCode = QrCode::size(150)->generate($qrCodeUrl);
 
         // Optionally return the QR code as a response or save it
-        return response($qrCode)->header('Content-Type', 'image/svg+xml');
+       return view('dashboard.doctor.prescriptions.qr', compact('qrCode', 'patient', 'prescription'));
+
     }
 }

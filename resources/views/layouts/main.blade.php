@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     @yield('head')
 
@@ -40,21 +42,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-    <!-- Top Navbar -->
-    <nav class="bg-white shadow-sm z-10">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="{{ url('/') }}" class="text-primary font-bold text-lg">MedConnect</a>
-            <div class="space-x-6">
-                <a class="text-gray-700 hover:text-primary" href="{{ url('/doctor/dashboard') }}">Dashboard</a>
-                <a class="text-gray-700 hover:text-primary" href="{{ route('dashboard.doctor.prescriptions.index') }}">Prescriptions</a>
-                <a class="text-gray-700 hover:text-primary" href="{{ route('dashboard.doctor.patients.index') }}">Patients</a>
-                <form action="{{ route('logout') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="text-gray-700 hover:text-primary font-semibold">Logout</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+   
 
     <!-- Page Layout -->
     <div class="flex flex-1">
@@ -79,6 +67,7 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+@yield('scripts') <!-- ✅ Add this line -->
 
     @stack('scripts')
 </body>

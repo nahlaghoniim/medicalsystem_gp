@@ -2,65 +2,74 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\SocialController;
-use App\Http\Controllers\Auth\RoleSelectionController;
 
+// Auth Controllers
+use App\Http\Controllers\Auth\{
+    AuthenticatedSessionController,
+    RegisteredUserController,
+    SocialController
+};
+
+// Shared Controllers
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Doctor\DashboardController;
-use App\Http\Controllers\Doctor\PrescriptionController;
-use App\Http\Controllers\Doctor\PrescriptionItemController;
-use App\Http\Controllers\Doctor\PatientController;
-use App\Http\Controllers\Doctor\AppointmentController;
-use App\Http\Controllers\Doctor\PatientNoteController;
-use App\Http\Controllers\Doctor\PaymentController;
-use App\Http\Controllers\Doctor\MedicationController;
-use App\Http\Controllers\Doctor\SettingController;
+
+// Doctor Controllers
+use App\Http\Controllers\Doctor\{
+    DashboardController,
+    PrescriptionController,
+    PrescriptionItemController,
+    PatientController,
+    AppointmentController,
+    PatientNoteController,
+    PaymentController,
+    MedicationController,
+    SettingController,
+    MessageController
+};
+
+// Pharmacist Controllers
 use App\Http\Controllers\Pharmacist\PharmacistDashboardController;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', fn() => view('welcome'))->name('home');
 
-// Social Login
-Route::get('auth/google', [SocialController::class, 'redirectToGoogle'])->name('auth.google');
-Route::get('auth/google/callback', [SocialController::class, 'handleGoogleCallback']);
-Route::get('auth/facebook', [SocialController::class, 'redirectToFacebook'])->name('auth.facebook');
-Route::get('auth/facebook/callback', [SocialController::class, 'handleFacebookCallback']);
 
-// Guest Routes (Login/Register)
+// =====================
+// 🔐 Auth Routes
+// =====================
 Route::middleware('guest')->group(function () {
+    // Login / Register
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
 
+    // Role Selection
     Route::get('/register/role', [RegisteredUserController::class, 'selectRole'])->name('role.select');
     Route::post('/register/role', [RegisteredUserController::class, 'saveRole'])->name('role.save');
+
+    // Social Login
+    Route::get('auth/google', [SocialController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('auth/google/callback', [SocialController::class, 'handleGoogleCallback']);
+    Route::get('auth/facebook', [SocialController::class, 'redirectToFacebook'])->name('auth.facebook');
+    Route::get('auth/facebook/callback', [SocialController::class, 'handleFacebookCallback']);
 });
 
-// Logout
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-// Dashboard fallback
-Route::get('/dashboard/{id}', function ($id) {
-    $user = Auth::user();
-    if (!$user || $user->id != $id) {
-        abort(403);
-    }
-    return view('dashboard', compact('user'));
-})->middleware(['auth', 'verified'])->name('dashboard.user');
 
-// Profile
+// =====================
+// 👤 Profile
+// =====================
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Doctor Routes
+
+// =====================
+// 🩺 Doctor Routes
+// =====================
 Route::middleware(['auth', 'verified', 'doctor'])
     ->prefix('doctor/dashboard')
     ->name('dashboard.doctor.')
@@ -78,22 +87,22 @@ Route::middleware(['auth', 'verified', 'doctor'])
             Route::get('/{patient}', [PatientController::class, 'show'])->name('show');
             Route::delete('/{patient}', [PatientController::class, 'destroy'])->name('destroy');
 
-            // Notes
             Route::post('/{patient}/notes', [PatientNoteController::class, 'store'])->name('notes.store');
+Route::get('/{patient}/prescriptions/{prescription}/pdf', [PrescriptionController::class, 'generatePdf'])
+    ->name('prescriptions.pdf');
+
+
+
+
 
             // Prescriptions under patient
             Route::get('/{patient}/prescriptions', [PrescriptionController::class, 'index'])->name('prescriptions.index');
             Route::get('/{patient}/prescriptions/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
             Route::post('/{patient}/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
-
-            // Generate PDF for prescriptions of a patient
-            Route::get('/{patient}/prescriptions/pdf', [PrescriptionController::class, 'generatePdf'])->name('prescriptions.pdf');
-
-            // Generate QR for a specific prescription of a patient
             Route::get('/{patient}/prescriptions/{prescription}/qr', [PrescriptionController::class, 'generateQr'])->name('prescriptions.qr');
         });
 
-        // Prescriptions CRUD (not patient-specific)
+        // Prescriptions CRUD (global)
         Route::prefix('prescriptions')->name('prescriptions.')->group(function () {
             Route::get('/', [PrescriptionController::class, 'index'])->name('index');
             Route::get('/{prescription}', [PrescriptionController::class, 'show'])->name('show');
@@ -119,52 +128,75 @@ Route::middleware(['auth', 'verified', 'doctor'])
         Route::prefix('prescription-items')->name('prescription-items.')->group(function () {
             Route::put('/{id}', [PrescriptionItemController::class, 'update'])->name('update');
             Route::delete('/{id}', [PrescriptionItemController::class, 'destroy'])->name('destroy');
+          
         });
 
         // Settings
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
-        // Payments
+        // Payments & Medications
         Route::resource('payments', PaymentController::class)->names('payments');
-
-        // Medications
         Route::resource('medications', MedicationController::class)->only(['index'])->names('medications');
         Route::get('medications/search', [MedicationController::class, 'search'])->name('medications.search');
+Route::put('appointments/{appointment}', [AppointmentController::class, 'update'])
+    ->name('appointments.update');
+
+Route::post('appointments/{appointment}/mark-paid', [PaymentController::class, 'markPaid'])
+    ->name('appointments.markPaid');
+
+
+        // Messages
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [MessageController::class, 'index'])->name('index');
+            Route::get('/{id}', [MessageController::class, 'show'])->name('show');
+            Route::delete('/{id}', [MessageController::class, 'destroy'])->name('destroy');
+        });
     });
-// Pharmacist Routes
+
+
+// =====================
+// 💊 Pharmacist Routes
+// =====================
 Route::middleware(['auth', 'verified', 'pharmacist'])
     ->prefix('pharmacist/dashboard')
     ->name('dashboard.pharmacist.')
     ->group(function () {
 
-        // Dashboard Home
         Route::get('/', [PharmacistDashboardController::class, 'index'])->name('index');
-Route::get('/prescriptions', [PharmacistDashboardController::class, 'allPrescriptions'])->name('prescriptions.all');
-
-        // Search for patients by ID or name (quick search or listing page)
+        Route::get('/prescriptions', [PharmacistDashboardController::class, 'allPrescriptions'])->name('prescriptions.all');
+        Route::get('/patients', [PharmacistDashboardController::class, 'allPatients'])->name('patients.index');
         Route::get('/patients/search', [PharmacistDashboardController::class, 'search'])->name('patients.search');
-
-        // View single patient's prescriptions
         Route::get('/patients/{id}', [PharmacistDashboardController::class, 'viewPatient'])->name('patients.view');
 
-        // Show form to enter patient credentials (new flow)
+        // Search Form
         Route::get('/patient-search', [PharmacistDashboardController::class, 'showSearchForm'])->name('patient.search.form');
-Route::get('/patients', [PharmacistDashboardController::class, 'allPatients'])->name('patients.index');
-
-        // Handle patient search form submission
         Route::post('/patient-search', [PharmacistDashboardController::class, 'searchPatient'])->name('patient.search.submit');
 
-        // ✅ Correct prescription complete route
         Route::post('prescription/{id}/complete', [PharmacistDashboardController::class, 'completePrescription'])->name('pharmacist.prescription.complete');
-   Route::get('/scan', function () {
-    return view('pharmacist.scan');
-})->name('scan');
-// Messages
-Route::get('/messages', [PharmacistDashboardController::class, 'messages'])->name('messages.index');
-Route::post('/messages/{id}/toggle', [PharmacistDashboardController::class, 'toggleMessageStatus'])->name('messages.toggle');
-Route::get('/settings', [PharmacistDashboardController::class, 'settings'])->name('settings');
-Route::post('/settings', [PharmacistDashboardController::class, 'updateSettings'])->name('settings.update');
 
-   
+        // Scan Page
+        Route::get('/scan', fn() => view('pharmacist.scan'))->name('scan');
+
+        // Messages
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [PharmacistDashboardController::class, 'messages'])->name('index');
+            Route::post('/{id}/toggle', [PharmacistDashboardController::class, 'toggleMessageStatus'])->name('toggle');
+        });
+
+        // Settings
+        Route::get('/settings', [PharmacistDashboardController::class, 'settings'])->name('settings');
+        Route::post('/settings', [PharmacistDashboardController::class, 'updateSettings'])->name('settings.update');
     });
+
+
+// =====================
+// 🧑‍💻 Dashboard fallback
+// =====================
+Route::get('/dashboard/{id}', function ($id) {
+    $user = Auth::user();
+    if (!$user || $user->id != $id) {
+        abort(403);
+    }
+    return view('dashboard', compact('user'));
+})->middleware(['auth', 'verified'])->name('dashboard.user');

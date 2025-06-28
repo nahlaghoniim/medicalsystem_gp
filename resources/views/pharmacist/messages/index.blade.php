@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="flex min-h-screen bg-gray-100">
+    
  <!-- Sidebar -->
 <aside class="w-64 bg-white border-r flex flex-col justify-between">
     <div>
@@ -11,35 +12,30 @@
         </div>
         <nav class="mt-4 space-y-1">
 
-            <!-- Dashboard -->
-            <a href="{{ route('dashboard.pharmacist.index') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-home mr-3"></i> Dashboard
-            </a>
+           <a href="{{ route('dashboard.pharmacist.index') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard') ? 'active' : '' }}">
+   <i class="fas fa-home mr-3"></i> Dashboard
+</a>
 
-            <!-- Prescriptions -->
-            <a href="{{ route('dashboard.pharmacist.prescriptions.all') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/prescriptions') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-prescription-bottle-alt mr-3"></i> Prescriptions
-            </a>
+<a href="{{ route('dashboard.pharmacist.prescriptions.all') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/prescriptions') ? 'active' : '' }}">
+   <i class="fas fa-prescription-bottle-alt mr-3"></i> Prescriptions
+</a>
 
-            <!-- Patient Records -->
-            <a href="{{ route('dashboard.pharmacist.patients.index') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/patients') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-user-injured mr-3"></i> Patient Records
-            </a>
+<a href="{{ route('dashboard.pharmacist.patients.index') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/patients') ? 'active' : '' }}">
+   <i class="fas fa-user-injured mr-3"></i> Patient Records
+</a>
 
-            <!-- Messages -->
-            <a href="{{ route('dashboard.pharmacist.messages.index') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/messages') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-envelope mr-3"></i> Messages
-            </a>
+<a href="{{ route('dashboard.pharmacist.messages.index') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/messages') ? 'active' : '' }}">
+   <i class="fas fa-envelope mr-3"></i> Messages
+</a>
 
-            <!-- Settings -->
-            <a href="{{ route('dashboard.pharmacist.settings') }}"
-                class="flex items-center px-6 py-3 {{ Request::is('pharmacist/dashboard/settings') ? 'bg-[#d6e7f1] text-[#1d5e86] font-bold' : 'text-gray-700' }} hover:bg-[#d6e7f1] hover:text-[#1d5e86] transition">
-                <i class="fas fa-cog mr-3"></i> Settings
-            </a>
+<a href="{{ route('dashboard.pharmacist.settings') }}"
+   class="sidebar-link {{ Request::is('pharmacist/dashboard/settings') ? 'active' : '' }}">
+   <i class="fas fa-cog mr-3"></i> Settings
+</a>
 
         </nav>
     </div>

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
@@ -13,14 +12,14 @@ class PrescriptionItemController extends Controller
         $item = PrescriptionItem::findOrFail($id);
         $item->update($request->only(['medicine_name', 'dosage', 'duration_days']));
 
-        return response()->json(['message' => 'Updated successfully']);
+        return redirect()->back(); // 🔁 Just reload the same page
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $item = PrescriptionItem::findOrFail($id);
         $item->delete();
 
-        return response()->json(['message' => 'Deleted successfully']);
+        return redirect()->back(); // 🔁 Just reload the same page
     }
 }

@@ -1,96 +1,122 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="max-w-4xl mx-auto p-6 bg-white shadow rounded">
-    <h2 class="text-xl font-semibold mb-4">Edit Prescription</h2>
-    <hr class="my-6">
+<div id="notification" class="hidden fixed top-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50"></div>
 
-    {{-- List of Prescription Items --}}
+<div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+    <h2 class="text-2xl font-bold text-[#1D5E86] mb-6">Edit Prescription for {{ $prescription->patient->name }}</h2>
+
     @foreach ($prescription->items as $item)
-    <div class="mb-4 border p-4 rounded shadow bg-white" id="item-{{ $item->id }}">
-        {{-- Update Form --}}
-        <form class="update-item-form" data-id="{{ $item->id }}" 
-              action="{{ route('dashboard.doctor.prescription-items.update', $item->id) }}" 
-              method="POST">
-            @csrf
-            @method('PUT')
-            <label class="block font-medium">Medicine Name</label>
-            <input type="text" name="medicine_name" class="form-control mb-2 w-full" value="{{ $item->medicine_name }}">
+        <div class="mb-6 border rounded-xl shadow-sm bg-gray-50 p-6" id="item-{{ $item->id }}">
+            <form class="update-item-form space-y-4" data-id="{{ $item->id }}" 
+                  action="{{ route('dashboard.doctor.prescription-items.update', $item->id) }}" method="POST">
+                @csrf
+                @method('PUT')
 
-            <label class="block font-medium">Dosage</label>
-            <input type="text" name="dosage" class="form-control mb-2 w-full" value="{{ $item->dosage }}">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Medicine Name</label>
+                    <input type="text" name="medicine_name" value="{{ $item->medicine_name ?? $item->medication->name ?? '' }}"
+                           class="w-full rounded-md border-gray-300 shadow-sm p-2">
+                </div>
 
-            <label class="block font-medium">Duration (days)</label>
-            <input type="number" name="duration_days" class="form-control mb-2 w-full" value="{{ $item->duration_days }}">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Dosage</label>
+                    <input type="text" name="dosage" value="{{ $item->dosage }}"
+                           class="w-full rounded-md border-gray-300 shadow-sm p-2">
+                </div>
 
-            <div class="flex justify-between items-center mt-2">
-                <button type="submit" class="btn btn-primary">Update</button>
-        </form>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Duration (days)</label>
+                    <input type="number" name="duration_days" value="{{ $item->duration_days }}"
+                           class="w-full rounded-md border-gray-300 shadow-sm p-2">
+                </div>
 
-        {{-- Delete Form --}}
-        <form class="delete-item-form" data-id="{{ $item->id }}" 
-              action="{{ route('dashboard.doctor.prescription-items.destroy', $item->id) }}" 
-              method="POST">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
+                <div class="flex justify-between items-center pt-4">
+                    <button type="submit"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                        Update
+                    </button>
+                </div>
+            </form>
+
+            <form class="delete-item-form mt-2 text-right"
+                  action="{{ route('dashboard.doctor.prescription-items.destroy', $item->id) }}"
+                  method="POST" data-id="{{ $item->id }}">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">
+                    Delete
+                </button>
+            </form>
         </div>
-    </div>
     @endforeach
 
-    {{-- Final Save Button --}}
-    <form method="GET" action="{{ route('dashboard.doctor.patients.show', $prescription->patient_id) }}">
-        <button type="submit" class="btn btn-success mt-6">Save and Return to Patient</button>
-    </form>
+    <div class="text-right">
+        <a href="{{ route('dashboard.doctor.patients.show', $prescription->patient_id) }}"
+           class="inline-block mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
+            Back to Patient Profile
+        </a>
+    </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-$(document).ready(function () {
-    // Handle item update
-    $('.update-item-form').on('submit', function (e) {
-        e.preventDefault();
-        const form = $(this);
-        const id = form.data('id');
-        const actionUrl = form.attr('action');
+    function showMessage(message, isSuccess = true) {
+        const notification = $('#notification');
+        notification.removeClass('hidden').removeClass('bg-green-500 bg-red-500')
+                   .addClass(isSuccess ? 'bg-green-500' : 'bg-red-500')
+                   .text(message);
+        setTimeout(() => notification.addClass('hidden'), 3000);
+    }
 
-        $.ajax({
-            url: actionUrl,
-            type: 'POST',
-            data: form.serialize(),
-            success: function () {
-                alert('Updated successfully.');
-            },
-            error: function (xhr) {
-                alert('Update failed: ' + xhr.responseText);
-            }
+    $(document).ready(function () {
+        // UPDATE AJAX
+        $('.update-item-form').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const actionUrl = form.attr('action');
+
+            $.ajax({
+                url: actionUrl,
+                type: 'POST',
+                data: form.serialize(),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (res) {
+                    showMessage(res.message || 'Updated successfully');
+                },
+                error: function (xhr) {
+                    showMessage('Update failed', false);
+                }
+            });
+        });
+
+        // DELETE AJAX
+        $('.delete-item-form').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const id = form.data('id');
+            const actionUrl = form.attr('action');
+
+            $.ajax({
+                url: actionUrl,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    _method: 'DELETE'
+                },
+                success: function (res) {
+                    $('#item-' + id).remove();
+                    showMessage(res.message || 'Deleted successfully');
+                },
+                error: function () {
+                    showMessage('Delete failed', false);
+                }
+            });
         });
     });
-
-    // Handle item delete
-    $('.delete-item-form').on('submit', function (e) {
-        e.preventDefault();
-        const form = $(this);
-        const id = form.data('id');
-        const actionUrl = form.attr('action');
-
-        $.ajax({
-            url: actionUrl,
-            type: 'POST',
-            data: {
-                _method: 'DELETE',
-                _token: form.find('input[name="_token"]').val()
-            },
-            success: function () {
-                $('#item-' + id).remove();
-            },
-            error: function (xhr) {
-                alert('Delete failed: ' + xhr.responseText);
-            }
-        });
-    });
-});
 </script>
 @endsection

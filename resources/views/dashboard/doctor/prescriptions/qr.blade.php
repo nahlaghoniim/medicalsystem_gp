@@ -1,98 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code</title>
+    <title>Prescription QR Code</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Global styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
-            padding: 0;
-        }
-
-        /* Center content */
-        .container {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB;
+            color: #0E0F11;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #fff;
-            padding: 20px;
         }
 
-        /* Heading style */
-        h2 {
-            font-size: 24px;
-            color: #1D5E86;
-            margin-bottom: 20px;
-        }
-
-        /* QR Code container styling */
-        .qr-container {
+        .card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
             text-align: center;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            max-width: 400px;
+            width: 100%;
         }
 
-        /* Optional styling for the QR code itself */
-        .qr-container svg {
-            margin-top: 20px;
-            max-width: 150px;
+        h1 {
+            color: #1D5E86;
+            font-size: 24px;
+            margin-bottom: 24px;
+        }
+
+        .qr svg {
+            width: 180px;
             height: auto;
         }
 
-        /* Button style */
         .btn {
+            margin-top: 32px;
             display: inline-block;
-            padding: 10px 20px;
-            margin-top: 20px;
-            text-decoration: none;
             background-color: #1D5E86;
-            color: white;
-            border-radius: 5px;
-            font-weight: bold;
-            text-align: center;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
         }
 
         .btn:hover {
-            background-color: #155a74;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            h2 {
-                font-size: 20px;
-            }
-
-            .qr-container {
-                padding: 15px;
-            }
-
-            .btn {
-                padding: 8px 16px;
-            }
+            background-color: #144866;
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <h2>QR Code for Prescription</h2>
-        <div class="qr-container">
-            <!-- Display the generated QR code -->
+    <div class="card">
+        <h1>Scan Prescription QR Code</h1>
+        <div class="qr">
             {!! $qrCode !!}
         </div>
-        <!-- Optional: Link to go back or to another page -->
-        <a href="{{ route('dashboard.doctor.prescriptions.index') }}" class="btn">Back to Prescriptions</a>
+        <a href="{{ route('dashboard.doctor.prescriptions.index') }}" class="btn">← Back to Prescriptions</a>
     </div>
 </body>
-
 </html>

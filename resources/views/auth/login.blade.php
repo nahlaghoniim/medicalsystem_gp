@@ -2,6 +2,13 @@
 
 @section('content')
 <div class="min-h-screen flex">
+    <!-- Logo Top Left -->
+
+<div class="absolute top-6 left-6 flex items-center space-x-2 z-50">
+    <img src="{{ asset('images/wessal.png') }}" alt="WESAL Logo" class="h-10">
+    <span class="text-2xl font-bold" style="color: #1d5e86;">WESAL</span>
+</div>
+
     <!-- Left side image -->
     <div class="w-1/2 bg-cover bg-center" style="background-image: url('{{ asset('images/background.jpg') }}');">
         <!-- Background only -->

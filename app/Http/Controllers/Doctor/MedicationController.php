@@ -9,12 +9,21 @@ use App\Models\PrescriptionItem;
 
 class MedicationController extends Controller
 {
-    public function index()
-    {
-        $medications = Medication::paginate(1000); // or any number you prefer
-        return view('dashboard.doctor.medications.index', compact('medications'));
+
+public function index(Request $request)
+{
+    $query = Medication::query();
+
+    if ($search = $request->input('search')) {
+        $query->where('name', 'like', "%{$search}%")
+              ->orWhere('generic_name', 'like', "%{$search}%")
+              ->orWhere('manufacturer', 'like', "%{$search}%");
     }
 
+    $medications = $query->orderBy('name')->paginate(50); // 50 is cleaner than 1000
+
+    return view('dashboard.doctor.medications.index', compact('medications'));
+}
     public function create()
     {
         return view('dashboard.doctor.medications.create');

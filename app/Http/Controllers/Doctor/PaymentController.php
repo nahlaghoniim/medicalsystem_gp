@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Doctor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Payment; // ✅ Add this line
+use App\Models\Appointment;
 
 
 class PaymentController extends Controller
@@ -47,10 +48,11 @@ class PaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
+    public function show($id)
+{
+    $payment = Payment::with(['patient', 'appointment'])->findOrFail($id);
+    return view('dashboard.doctor.payments.show', compact('payment'));
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -75,4 +77,18 @@ class PaymentController extends Controller
     {
         //
     }
+    public function markPaid(Appointment $appointment)
+{
+    if (!$appointment->payment) {
+        $appointment->payment()->create([
+            'status' => 'paid',
+            'amount' => 100, // or your dynamic value
+        ]);
+    } else {
+        $appointment->payment->update(['status' => 'paid']);
+    }
+
+    return response()->json(['status' => 'paid']);
+}
+
 }

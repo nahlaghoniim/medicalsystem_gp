@@ -3,6 +3,8 @@
 @section('content')
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
+    <x-dashboard.sidebar />
+
         <h1 class="h4 mb-0">All Prescriptions</h1>
 
         <!-- Redirect to create prescription form for selected patient -->
