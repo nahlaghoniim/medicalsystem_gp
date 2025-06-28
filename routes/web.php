@@ -77,7 +77,9 @@ Route::middleware(['auth', 'verified', 'doctor'])
 
         Route::get('/', [DashboardController::class, 'index'])->name('index');
 
-        // Patients
+        // =====================
+        // 👤 Patients
+        // =====================
         Route::prefix('patients')->name('patients.')->group(function () {
             Route::get('/', [PatientController::class, 'index'])->name('index');
             Route::get('/create', [PatientController::class, 'create'])->name('create');
@@ -88,21 +90,18 @@ Route::middleware(['auth', 'verified', 'doctor'])
             Route::delete('/{patient}', [PatientController::class, 'destroy'])->name('destroy');
 
             Route::post('/{patient}/notes', [PatientNoteController::class, 'store'])->name('notes.store');
-Route::get('/{patient}/prescriptions/{prescription}/pdf', [PrescriptionController::class, 'generatePdf'])
-    ->name('prescriptions.pdf');
-
-
-
-
 
             // Prescriptions under patient
             Route::get('/{patient}/prescriptions', [PrescriptionController::class, 'index'])->name('prescriptions.index');
             Route::get('/{patient}/prescriptions/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
             Route::post('/{patient}/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
             Route::get('/{patient}/prescriptions/{prescription}/qr', [PrescriptionController::class, 'generateQr'])->name('prescriptions.qr');
+            Route::get('/{patient}/prescriptions/{prescription}/pdf', [PrescriptionController::class, 'generatePdf'])->name('prescriptions.pdf');
         });
 
-        // Prescriptions CRUD (global)
+        // =====================
+        // 💊 Global Prescriptions
+        // =====================
         Route::prefix('prescriptions')->name('prescriptions.')->group(function () {
             Route::get('/', [PrescriptionController::class, 'index'])->name('index');
             Route::get('/{prescription}', [PrescriptionController::class, 'show'])->name('show');
@@ -111,7 +110,9 @@ Route::get('/{patient}/prescriptions/{prescription}/pdf', [PrescriptionControlle
             Route::delete('/{prescription}', [PrescriptionController::class, 'destroy'])->name('destroy');
         });
 
-        // Appointments
+        // =====================
+        // 📅 Appointments
+        // =====================
         Route::prefix('appointments')->name('appointments.')->group(function () {
             Route::get('/', [AppointmentController::class, 'index'])->name('index');
             Route::get('/create', [AppointmentController::class, 'create'])->name('create');
@@ -119,41 +120,45 @@ Route::get('/{patient}/prescriptions/{prescription}/pdf', [PrescriptionControlle
             Route::get('/{appointment}/edit', [AppointmentController::class, 'edit'])->name('edit');
             Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('update');
             Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('show');
+
             Route::post('/{appointment}/complete', [AppointmentController::class, 'markAsCompleted'])->name('markCompleted');
             Route::post('/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('cancel');
             Route::post('/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('reschedule');
+
+            // ✅ Payment Mark as Paid
+            Route::post('/{appointment}/mark-paid', [PaymentController::class, 'markPaid'])->name('markPaid');
         });
 
-        // Prescription Items
+        // =====================
+        // 💊 Prescription Items
+        // =====================
         Route::prefix('prescription-items')->name('prescription-items.')->group(function () {
             Route::put('/{id}', [PrescriptionItemController::class, 'update'])->name('update');
             Route::delete('/{id}', [PrescriptionItemController::class, 'destroy'])->name('destroy');
-          
         });
 
-        // Settings
+        // =====================
+        // ⚙️ Settings
+        // =====================
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
-        // Payments & Medications
+        // =====================
+        // 💵 Payments & Medications
+        // =====================
         Route::resource('payments', PaymentController::class)->names('payments');
         Route::resource('medications', MedicationController::class)->only(['index'])->names('medications');
         Route::get('medications/search', [MedicationController::class, 'search'])->name('medications.search');
-Route::put('appointments/{appointment}', [AppointmentController::class, 'update'])
-    ->name('appointments.update');
 
-Route::post('appointments/{appointment}/mark-paid', [PaymentController::class, 'markPaid'])
-    ->name('appointments.markPaid');
-
-
-        // Messages
+        // =====================
+        // 💬 Messages
+        // =====================
         Route::prefix('messages')->name('messages.')->group(function () {
             Route::get('/', [MessageController::class, 'index'])->name('index');
             Route::get('/{id}', [MessageController::class, 'show'])->name('show');
             Route::delete('/{id}', [MessageController::class, 'destroy'])->name('destroy');
         });
     });
-
 
 // =====================
 // 💊 Pharmacist Routes

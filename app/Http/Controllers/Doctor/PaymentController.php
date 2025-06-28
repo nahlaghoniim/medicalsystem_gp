@@ -77,12 +77,13 @@ class PaymentController extends Controller
     {
         //
     }
-    public function markPaid(Appointment $appointment)
+   public function markPaid(Appointment $appointment)
 {
     if (!$appointment->payment) {
         $appointment->payment()->create([
+            'patient_id' => $appointment->patient_id, // ✅ نمرر الـ patient_id
             'status' => 'paid',
-            'amount' => 100, // or your dynamic value
+            'amount' => 100, // يمكنكِ تغييره حسب السعر المطلوب
         ]);
     } else {
         $appointment->payment->update(['status' => 'paid']);

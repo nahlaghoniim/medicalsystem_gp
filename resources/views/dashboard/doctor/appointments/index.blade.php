@@ -65,18 +65,18 @@
                                     {{ $appointment->status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4" id="payment-cell-{{ $appointment->id }}">
-                                @if($appointment->payment && $appointment->payment->status === 'paid')
-                                    <span class="text-green-600 font-semibold">Paid</span>
-                                @else
-                                    <span class="text-red-500 font-semibold">Unpaid</span>
-                                    <button type="button"
-                                            onclick="markAsPaid({{ $appointment->id }})"
-                                            class="ml-2 text-blue-500 hover:underline text-sm">
-                                        Pay
-                                    </button>
-                                @endif
-                            </td>
+                         <td class="px-6 py-4" id="payment-cell-{{ $appointment->id }}">
+    @if($appointment->payment && $appointment->payment->status === 'paid')
+        <span class="text-green-600 font-semibold">Paid</span>
+    @else
+        <span class="text-red-500 font-semibold">Unpaid</span>
+<button onclick="markAsPaid({{ $appointment->id }})" class="ml-2 text-blue-500 hover:underline text-sm">
+    Pay
+</button>
+
+    @endif
+</td>
+
                             <td class="px-6 py-4 flex gap-3 text-sm">
                                 <a href="{{ route('dashboard.doctor.appointments.edit', $appointment) }}" class="text-yellow-600 hover:underline">Edit</a>
 
@@ -124,26 +124,27 @@
     function markAsPaid(appointmentId) {
         if (!confirm('Confirm payment for this appointment?')) return;
 
-fetch("{{ route('dashboard.doctor.appointments.markPaid', ':id') }}".replace(':id', appointmentId), ...)
+        fetch(`/doctor/dashboard/appointments/${appointmentId}/mark-paid`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             }
         })
         .then(response => {
-            if (!response.ok) throw new Error('Request failed');
+            if (!response.ok) throw new Error('Payment failed');
             return response.json();
         })
         .then(data => {
             if (data.status === 'paid') {
+                // ✅ Update cell content
                 document.getElementById(`payment-cell-${appointmentId}`).innerHTML =
                     '<span class="text-green-600 font-semibold">Paid</span>';
             }
         })
         .catch(error => {
-            alert('Payment failed: ' + error.message);
+            alert('Error: ' + error.message);
         });
     }
 </script>

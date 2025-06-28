@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
     <meta charset="UTF-8">
     <title>Wessal | Healthcare System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -67,8 +70,9 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
-@yield('scripts') <!-- ✅ Add this line -->
 
     @stack('scripts')
+    @yield('scripts')
+
 </body>
 </html>
