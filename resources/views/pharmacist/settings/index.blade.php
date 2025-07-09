@@ -8,7 +8,7 @@
     <div>
         <div class="p-6 flex items-center space-x-2">
             <img src="/images/wessal.png" class="h-8 w-8" alt="Logo">
-            <span style="color: #1d5e86;" class="font-bold text-xl">WESSAL</span>
+            <span style="color: #1d5e86;" class="font-bold text-xl">WESAL</span>
         </div>
         <nav class="mt-4 space-y-1">
 

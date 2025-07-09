@@ -88,6 +88,8 @@ Route::middleware(['auth', 'verified', 'doctor'])
             Route::put('/{patient}', [PatientController::class, 'update'])->name('update');
             Route::get('/{patient}', [PatientController::class, 'show'])->name('show');
             Route::delete('/{patient}', [PatientController::class, 'destroy'])->name('destroy');
+    Route::post('/{patient}/rays', [\App\Http\Controllers\RayController::class, 'store'])->name('rays.store');
+Route::delete('/{patient}/rays/{ray}', [\App\Http\Controllers\RayController::class, 'destroy'])->name('rays.destroy');
 
             Route::post('/{patient}/notes', [PatientNoteController::class, 'store'])->name('notes.store');
 

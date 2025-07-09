@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Doctor\AppointmentController;
 use App\Http\Controllers\Api\Doctor\PatientNoteController;
 use App\Http\Controllers\Api\Doctor\PaymentController;
 use App\Http\Controllers\Api\Doctor\MedicationController;
+use App\Http\Controllers\Api\DeviceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,4 +80,8 @@ Route::middleware('auth:sanctum')->group(function () {
      Route::get('medications/search', [MedicationController::class, 'search'])
      ->name('medications.search');
 
+});
+Route::prefix('device')->group(function () {
+    Route::get('/pillbox/schedule/{device_uid}', [DeviceController::class, 'getSchedule']);
+    Route::post('/pillbox/logs', [DeviceController::class, 'storeLog']);
 });

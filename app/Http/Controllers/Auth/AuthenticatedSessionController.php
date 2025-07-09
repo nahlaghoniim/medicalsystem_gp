@@ -63,4 +63,5 @@ return redirect()->route('dashboard.pharmacist.index');
 
         return redirect('/');
     }
+    
 }

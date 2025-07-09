@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Model;
+
 class Patient extends Model
 {
     protected $fillable = [
@@ -50,4 +51,9 @@ protected static function booted()
         }
     });
 }
+public function rays()
+{
+    return $this->hasMany(Ray::class);
+}
+
 }

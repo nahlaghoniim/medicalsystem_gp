@@ -15,23 +15,26 @@ class PaymentController extends Controller
         return response()->json($payments);
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:Paid,Pending',
-        ]);
+  public function store(Request $request)
+{
+    $data = $request->validate([
+        'patient_id' => 'required|exists:patients,id',
+        'appointment_id' => 'required|exists:appointments,id',
+        'amount' => 'required|numeric|min:0',
+        'status' => 'required|in:Paid,Pending',
+    ]);
 
-        $payment = Payment::create([
-            'doctor_id' => Auth::id(),
-            'patient_id' => $data['patient_id'],
-            'amount' => $data['amount'],
-            'status' => $data['status'],
-        ]);
+    $payment = Payment::create([
+        'doctor_id' => Auth::id(),
+        'patient_id' => $data['patient_id'],
+        'appointment_id' => $data['appointment_id'], // ✅ Make sure this is included
+        'amount' => $data['amount'],
+        'status' => $data['status'],
+    ]);
 
-        return response()->json($payment, 201);
-    }
+    return response()->json($payment, 201);
+}
+
 
     public function show($id)
 {

@@ -3,7 +3,7 @@
     <div>
         <div class="p-6 flex items-center space-x-2">
             <img src="/images/wessal.png" class="h-8 w-8" alt="Logo">
-            <span class="font-bold text-xl" style="color: #1D5E86;">WESSAL</span>
+            <span class="font-bold text-xl" style="color: #1D5E86;">WESAL</span>
         </div>
 
         <nav class="mt-4 space-y-1">

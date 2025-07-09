@@ -139,4 +139,5 @@ class PatientController extends Controller
             'message' => 'Patient deleted successfully.'
         ]);
     }
+   
 }
